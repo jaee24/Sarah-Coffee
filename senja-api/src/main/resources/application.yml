@@ -1,0 +1,10 @@
+spring:
+  datasource:
+    url: jdbc:mysql://localhost:3306/senja?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Jakarta
+    username: root        # sesuaikan dengan MySQL/XAMPP kamu
+    password: ""          # default XAMPP: kosong
+
+server:
+  port: 8080
+  tomcat:
+    max-swallow-size: 100MB

@@ -1,0 +1,1753 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SEDUH · POS Kopi &amp; Dapur</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400..700;1,9..144,400..700&family=Plus+Jakarta+Sans:ital,wght@0,400..800;1,400..800&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+/* ============ TOKEN & TEMA ============ */
+:root[data-theme="light"]{
+  --bg:#F4EDDD; --surface:#FFFBF1; --surface2:#EFE4CD; --ink:#33241A; --ink2:#8A7460;
+  --line:#E3D6BC; --accent:#7C4A21; --accent-ink:#FFF7EA; --accent-soft:#F1DFC5;
+  --ok:#3E6B39; --err:#A83A2A; --shadow:0 14px 34px rgba(51,36,26,.10);
+}
+:root[data-theme="dark"]{
+  --bg:#171009; --surface:#221910; --surface2:#2D2216; --ink:#F1E7D5; --ink2:#A89579;
+  --line:#3C2D1D; --accent:#D9A05B; --accent-ink:#2A1806; --accent-soft:#3A2A16;
+  --ok:#93C27C; --err:#E2795F; --shadow:0 16px 40px rgba(0,0,0,.45);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{height:100%}
+body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(--ink);font-size:14px;-webkit-font-smoothing:antialiased;overflow:hidden}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+img{display:block;max-width:100%}
+.mono{font-family:'JetBrains Mono',monospace}
+svg.lucide{width:18px;height:18px;stroke-width:1.9;flex:none}
+::-webkit-scrollbar{width:9px;height:9px}
+::-webkit-scrollbar-thumb{background:var(--line);border-radius:99px;border:2px solid var(--bg)}
+::-webkit-scrollbar-track{background:transparent}
+body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:2000;opacity:.05;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E")}
+
+/* ============ KOMPONEN UMUM ============ */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:9px;padding:11px 20px;border-radius:12px;border:1px solid transparent;background:var(--accent);color:var(--accent-ink);font-weight:700;font-size:14.5px;transition:filter .18s,transform .15s,box-shadow .18s}
+.btn:hover{filter:brightness(1.08);transform:translateY(-1px);box-shadow:var(--shadow)}
+.btn:active{transform:translateY(0)}
+.btn:disabled{opacity:.45;cursor:not-allowed;transform:none;filter:none;box-shadow:none}
+.btn.big{width:100%;padding:14px;font-size:15px}
+.btn-ghost{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:10px 18px;border-radius:12px;border:1px solid var(--line);background:transparent;color:var(--ink);font-weight:600;font-size:14px;transition:.18s}
+.btn-ghost:hover{border-color:var(--accent);color:var(--accent)}
+.btn-danger{background:var(--err);color:#FFF3EE}
+.w100{width:100%}
+.input{width:100%;padding:11px 14px;border-radius:11px;border:1px solid var(--line);background:var(--surface);color:var(--ink);font-size:14px;transition:border-color .15s,box-shadow .15s}
+.input:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 22%,transparent)}
+.input[readonly]{background:var(--surface2);color:var(--ink2);cursor:not-allowed}
+.fl{display:block;margin-bottom:16px}
+.fl>span:first-child{display:block;font-size:11.5px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--ink2);margin-bottom:8px}
+.fl-lbl{display:block;font-size:11.5px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--ink2);margin-bottom:9px}
+.fl-lbl em{font-style:normal;font-weight:500;text-transform:none;letter-spacing:0;opacity:.85}
+.fgroup{margin-bottom:16px}
+.search{display:flex;align-items:center;gap:10px;padding:0 15px;border:1px solid var(--line);border-radius:13px;background:var(--surface);flex:1;min-width:200px;color:var(--ink2)}
+.search input{flex:1;border:0;background:none;padding:12px 0;color:var(--ink);outline:none;font-size:14px}
+.search input::placeholder{color:var(--ink2)}
+.chip{padding:9px 18px;border-radius:999px;border:1px solid var(--line);background:transparent;color:var(--ink2);font-weight:600;font-size:13.5px;transition:background .2s,color .2s,border-color .2s}
+.chip:hover{background:var(--accent-soft);color:var(--ink)}
+.chip.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.ibtn{width:33px;height:33px;border-radius:9px;border:1px solid var(--line);background:transparent;color:var(--ink2);display:inline-flex;align-items:center;justify-content:center;transition:.15s}
+.ibtn:hover{border-color:var(--accent);color:var(--accent)}
+.ibtn.danger:hover{border-color:var(--err);color:var(--err)}
+.ibtn svg{width:15px;height:15px}
+.seg{display:inline-flex;background:var(--surface2);border-radius:12px;padding:3px;gap:2px}
+.seg button{border:0;background:none;color:var(--ink2);padding:9px 16px;border-radius:9px;font-weight:700;font-size:13.5px;display:inline-flex;align-items:center;gap:8px;transition:.15s}
+.seg button.on{background:var(--surface);color:var(--ink);box-shadow:0 2px 8px rgba(32,22,14,.18)}
+.seg svg{width:15px;height:15px}
+.money{display:flex}
+.money .prefix{padding:11px 14px;border:1px solid var(--line);border-right:0;border-radius:11px 0 0 11px;background:var(--surface2);color:var(--ink2);font-size:13px;font-family:'JetBrains Mono'}
+.money .input{border-radius:0 11px 11px 0}
+.dd{position:relative}
+.dd-btn{display:inline-flex;align-items:center;gap:9px;padding:9px 16px;border-radius:999px;border:1px solid var(--line);background:transparent;color:var(--ink);font-weight:600;font-size:13.5px;transition:.2s}
+.dd-btn:hover{background:var(--accent-soft)}
+.dd-btn svg{width:14px;height:14px;color:var(--ink2)}
+.dd-menu{position:absolute;top:calc(100% + 7px);left:0;background:var(--surface);border:1px solid var(--line);border-radius:13px;min-width:215px;padding:6px;box-shadow:0 18px 44px rgba(25,16,8,.24);z-index:60;display:none}
+.dd.up .dd-menu{top:auto;bottom:calc(100% + 7px)}
+.dd.open .dd-menu{display:block;animation:ddin .18s ease}
+@keyframes ddin{from{opacity:0;transform:translateY(-4px)}}
+.dd-item{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:9px 13px;border-radius:9px;cursor:pointer;font-size:13.5px;color:var(--ink2)}
+.dd-item:hover{background:var(--surface2);color:var(--ink)}
+.dd-item svg{width:14px;height:14px;color:var(--accent)}
+#toasts{position:fixed;right:22px;bottom:22px;z-index:2100;display:flex;flex-direction:column;gap:10px}
+.toast{display:flex;gap:11px;align-items:center;background:var(--ink);color:var(--bg);padding:13px 17px;border-radius:13px;font-size:13.5px;font-weight:600;box-shadow:0 16px 40px rgba(0,0,0,.32);animation:tin .32s cubic-bezier(.2,.9,.3,1.2);max-width:360px}
+.toast.out{opacity:0;transform:translateX(20px);transition:.3s}
+.toast svg{width:17px;height:17px}
+.toast.ok svg{color:#8FD9A0}.toast.err svg{color:#F09B82}.toast.info svg{color:#D9A05B}
+@keyframes tin{from{opacity:0;transform:translateY(14px)}}
+#modalRoot{position:fixed;inset:0;z-index:900;display:none;align-items:center;justify-content:center;background:rgba(22,14,9,.52);padding:22px}
+#modalRoot.open{display:flex}
+.modal{background:var(--surface);border:1px solid var(--line);border-radius:18px;max-width:560px;width:100%;max-height:90vh;overflow:auto;animation:mpop .3s cubic-bezier(.2,.9,.3,1.1)}
+.modal.sm{max-width:420px}
+@keyframes mpop{from{opacity:0;transform:translateY(16px) scale(.97)}}
+.modal-head{display:flex;align-items:center;justify-content:space-between;padding:19px 22px 13px}
+.modal-title{font-family:'Fraunces',serif;font-size:21px;font-weight:600;letter-spacing:-.2px}
+.modal-body{padding:6px 22px 20px}
+.modal-foot{display:flex;justify-content:flex-end;gap:10px;padding:16px 22px 20px;border-top:1px solid var(--line);flex-wrap:wrap}
+.mform{padding:6px 22px 14px}
+.locked{display:flex;align-items:center;gap:10px;border:1px solid var(--line);border-radius:11px;background:var(--surface2);padding:0 12px}
+.locked svg{width:14px;height:14px;color:var(--ink2)}
+.locked .input{border:0;background:none;padding:11px 0;box-shadow:none!important}
+.del-body{text-align:center;padding:8px 22px 6px}
+.del-body svg.big{width:38px;height:38px;color:var(--err);margin:6px auto 12px;display:block}
+.del-body p{color:var(--ink2);line-height:1.55}
+.del-name{margin-top:10px;color:var(--ink);font-weight:700}
+
+/* ============ LOGIN (desain awal SEDUH POS) ============ */
+#view-login{height:100vh;display:grid;grid-template-columns:minmax(360px,46%) 1fr}
+.login-left{position:relative;background:#1A130D;color:#EFE2CC;display:flex;flex-direction:column;justify-content:space-between;padding:52px 54px;overflow:hidden}
+.login-left::before{content:'';position:absolute;inset:0;background:radial-gradient(90% 70% at 20% 0%,rgba(217,138,95,.15),transparent 60%);pointer-events:none}
+.ll-brand{font-family:'Fraunces',serif;font-size:74px;font-weight:600;letter-spacing:-2px;line-height:.95}
+.ll-brand em{font-style:italic;color:#D98A5F}
+.ll-tag{margin-top:18px;font-size:15px;color:#B7A68C;max-width:340px;line-height:1.6}
+.ll-cup{margin:36px 0}
+.cup{width:170px;height:auto;color:#EFE2CC}
+.steam path{stroke:#D98A5F;stroke-width:2.6;stroke-linecap:round;fill:none;opacity:0;animation:rise 3.4s ease-in-out infinite}
+.steam .s2{animation-delay:1.1s}.steam .s3{animation-delay:2.2s}
+@keyframes rise{0%{transform:translateY(4px);opacity:0}30%{opacity:.75}100%{transform:translateY(-11px);opacity:0}}
+.ll-foot{font-size:12px;color:#7E6E56;font-family:'JetBrains Mono'}
+.login-right{display:flex;align-items:center;justify-content:center;padding:40px;background:var(--bg)}
+.login-form{width:min(400px,100%)}
+.lf-title{font-family:'Fraunces',serif;font-size:33px;font-weight:600;letter-spacing:-.5px}
+.lf-sub{color:var(--ink2);margin:8px 0 30px;line-height:1.55}
+.form-err{display:none;align-items:center;gap:8px;color:var(--err);font-size:13px;font-weight:600;margin:-6px 0 14px}
+.form-err.show{display:flex}
+.form-err svg{width:15px;height:15px}
+.field{position:relative;margin-top:8px}
+.field .input{padding-right:44px}
+.field .eye{position:absolute;right:8px;top:50%;transform:translateY(-50%);border:0;background:none;color:var(--ink2);width:32px;height:32px;display:flex;align-items:center;justify-content:center;border-radius:8px}
+.field .eye:hover{color:var(--accent)}
+.field .eye svg{width:16px;height:16px}
+.demo-box{margin-top:30px;padding-top:24px;border-top:1px dashed var(--line)}
+.demo-lbl{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink2);margin-bottom:12px;font-weight:700}
+.demo-chip{display:flex;align-items:center;justify-content:space-between;width:100%;padding:11px 15px;border:1px solid var(--line);border-radius:12px;background:var(--surface);margin-bottom:9px;transition:.18s;text-align:left}
+.demo-chip:hover{border-color:var(--accent);transform:translateY(-1px)}
+.dc-role{font-weight:700;font-size:13.5px}
+.dc-cred{font-family:'JetBrains Mono';font-size:11.5px;color:var(--ink2)}
+@media (max-width:920px){#view-login{grid-template-columns:1fr}.login-left{display:none}}
+
+/* ============ SHELL ============ */
+#view-app{display:flex;height:100vh}
+#sidebar{width:234px;flex:none;background:#221810;color:#E9DCC6;display:flex;flex-direction:column;padding:24px 15px 18px;border-right:1px solid var(--line)}
+.sb-brand{display:flex;align-items:center;gap:10px;padding:0 12px;margin-bottom:26px}
+.sb-cup{width:30px;height:30px;color:#D9A05B;flex:none}
+.sb-logo{font-family:'Fraunces',serif;font-size:24px;font-weight:700;letter-spacing:-.5px}
+.sb-logo em{font-style:italic;color:#D9A05B}
+.sb-pos{font-family:'JetBrains Mono';font-size:9.5px;color:#A89579;border:1px solid #4A3A26;border-radius:6px;padding:3px 6px;letter-spacing:.18em;margin-left:auto}
+#nav{display:flex;flex-direction:column;gap:3px;flex:1}
+.nav-item{display:flex;align-items:center;gap:13px;padding:11px 14px;border-radius:11px;color:#B7A78C;border:0;background:none;width:100%;font-weight:600;font-size:14px;transition:.16s;text-align:left}
+.nav-item:hover{background:rgba(255,255,255,.07);color:#F1E7D5}
+.nav-item.active{background:var(--accent);color:var(--accent-ink)}
+.nav-item svg{width:17px;height:17px}
+#sideUser{display:flex;align-items:center;gap:11px;padding:12px;border-top:1px dashed #4A3A26;margin-top:10px}
+.su-ava{width:38px;height:38px;border-radius:12px;background:var(--accent);color:var(--accent-ink);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:14px;flex:none}
+.su-info{flex:1;min-width:0}
+.su-name{font-weight:700;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.su-role{font-size:10.5px;color:#A89579;letter-spacing:.06em;text-transform:uppercase;margin-top:1px}
+#sideUser .ibtn{border-color:#4A3A26;color:#B7A78C}
+#sideUser .ibtn:hover{border-color:#D9A05B;color:#D9A05B}
+#main{flex:1;overflow-y:auto;padding:28px 38px 60px}
+.page{display:none}
+.page.on{display:block;animation:fadeup .34s ease}
+@keyframes fadeup{from{opacity:0;transform:translateY(10px)}}
+.page-head{display:flex;align-items:flex-end;justify-content:space-between;gap:20px;flex-wrap:wrap}
+.ph-title{font-family:'Fraunces',serif;font-size:33px;font-weight:600;letter-spacing:-.7px}
+.ph-sub{color:var(--ink2);margin-top:6px;font-size:14px}
+.link-back{display:inline-flex;align-items:center;gap:8px;border:0;background:none;color:var(--ink2);font-weight:700;font-size:13.5px;margin-bottom:16px;padding:4px 0;transition:.15s}
+.link-back:hover{color:var(--accent)}
+.link-back svg{width:15px;height:15px}
+
+/* ============ HOME (chart, hemat ruang) ============ */
+.hero{position:relative;overflow:hidden;border-radius:20px;padding:26px 34px;color:#FFF6E7;background:linear-gradient(118deg,#4A2E17 0%,#7C4A21 58%,#9A6230 100%)}
+.hero::after{content:'';position:absolute;right:-40px;bottom:-70px;width:300px;height:300px;border-radius:50%;background:radial-gradient(circle,rgba(255,226,178,.16),transparent 65%)}
+.hero-over{font-family:'JetBrains Mono';font-size:10.5px;letter-spacing:.28em;text-transform:uppercase;color:#EBCB9C;margin-bottom:9px}
+.hero-title{font-family:'Fraunces',serif;font-size:35px;font-weight:600;letter-spacing:-.8px;line-height:1.08}
+.hero-title em{font-style:italic;color:#EBCB9C}
+.hero-tag{font-family:'Fraunces',serif;font-style:italic;font-size:16.5px;color:#EBCB9C;margin-top:8px}
+.hero-sub{margin-top:12px;font-size:13px;color:#F3DFC0;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.hero-sub svg{width:14px;height:14px}
+.hero-cup{position:absolute;right:30px;top:22px;width:110px;color:#F3DFC0;opacity:.9}
+.hero-cup .steam path{stroke:#F3DFC0}
+@media (max-width:980px){.hero-cup{display:none}}
+.stat-strip{display:flex;align-items:stretch;background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:18px 26px;margin-top:14px;flex-wrap:wrap;row-gap:14px}
+.stat{padding:0 30px;border-left:1px solid var(--line)}
+.stat:first-child{border-left:0;padding-left:0}
+.stat-num{font-family:'Fraunces',serif;font-size:25px;font-weight:600;letter-spacing:-.5px}
+.stat-lbl{font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink2);margin-top:3px;font-weight:700}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:15px 18px 11px}
+.p-head{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin-bottom:9px;padding-bottom:9px;border-bottom:1px dashed var(--line)}
+.p-title{font-family:'Fraunces',serif;font-size:16.5px;font-weight:600;letter-spacing:-.2px}
+.p-count{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink2);font-weight:700;white-space:nowrap}
+.home-grid{display:grid;grid-template-columns:1fr 1fr;gap:15px;margin-top:15px}
+@media (max-width:1100px){.home-grid{grid-template-columns:1fr}}
+/* bar-row terlaris */
+.brow{display:flex;align-items:center;gap:11px;width:100%;padding:6px 6px;border:0;background:none;border-radius:10px;text-align:left;transition:background .15s}
+.brow:hover{background:var(--surface2)}
+.b-rank{font-family:'Fraunces',serif;font-style:italic;font-size:18px;font-weight:600;color:var(--ink2);width:18px;text-align:center;flex:none}
+.brow.top .b-rank{color:var(--accent)}
+.b-thumb{width:36px;height:36px;border-radius:10px;object-fit:cover;flex:none}
+.b-main{flex:1;min-width:0}
+.b-name{display:flex;align-items:baseline;gap:8px;font-weight:600;font-size:13px;white-space:nowrap;overflow:hidden}
+.b-name>span:first-child{overflow:hidden;text-overflow:ellipsis}
+.b-price{font-family:'JetBrains Mono';font-size:11px;color:var(--accent);font-weight:700;flex:none}
+.b-track{display:block;height:6px;background:var(--surface2);border-radius:99px;margin-top:5px;overflow:hidden}
+.b-track i{display:block;height:100%;background:var(--accent);border-radius:99px;transition:width .5s ease}
+.b-side{flex:none;text-align:right;width:54px}
+.b-qty{display:block;font-family:'JetBrains Mono';font-weight:700;font-size:13px}
+.b-lbl{display:block;font-size:9px;color:var(--ink2);text-transform:uppercase;letter-spacing:.08em;margin-top:1px}
+/* chart kolom per jam */
+.vchart{display:flex;align-items:flex-end;gap:10px;height:148px;padding:14px 4px 2px}
+.vcol{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;gap:6px;min-width:0}
+.v-val{font-family:'JetBrains Mono';font-size:10.5px;color:var(--ink2);font-weight:600;white-space:nowrap}
+.v-barw{flex:1;width:100%;display:flex;align-items:flex-end;justify-content:center}
+.v-bar{width:100%;max-width:44px;border-radius:8px 8px 3px 3px;background:linear-gradient(180deg,var(--accent),color-mix(in srgb,var(--accent) 55%,var(--surface2)));transition:height .5s ease,filter .15s}
+.vcol:hover .v-bar{filter:brightness(1.12)}
+.v-lbl{font-family:'JetBrains Mono';font-size:10.5px;color:var(--ink2)}
+
+/* ============ ORDER ============ */
+.o-row1{display:flex;gap:12px;margin-bottom:13px}
+.o-row2{display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin-bottom:22px}
+.cart-btn{margin-left:auto;position:relative;width:46px;height:42px;border-radius:13px;border:1px solid var(--line);background:var(--surface);color:var(--ink);display:flex;align-items:center;justify-content:center;transition:.18s}
+.cart-btn:hover{border-color:var(--accent);color:var(--accent);transform:translateY(-1px)}
+.cart-badge{position:absolute;top:-8px;right:-8px;min-width:21px;height:21px;padding:0 5px;border-radius:99px;background:var(--accent);color:var(--accent-ink);font-size:11.5px;font-weight:800;display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono'}
+.cart-badge.hide{display:none}
+.cart-btn.bump .cart-badge{animation:bump .4s}
+@keyframes bump{0%{transform:scale(1)}45%{transform:scale(1.45)}100%{transform:scale(1)}}
+.menu-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(174px,1fr));gap:15px}
+.mcard{position:relative;text-align:left;background:var(--surface);border:1px solid var(--line);border-radius:16px;overflow:hidden;padding:0;transition:transform .2s,box-shadow .2s,border-color .2s}
+.mcard:hover{transform:translateY(-4px);box-shadow:var(--shadow);border-color:var(--accent)}
+.m-img{height:108px;overflow:hidden;position:relative;background:var(--surface2)}
+.m-img img{width:100%;height:100%;object-fit:cover;transition:transform .35s}
+.mcard:hover .m-img img{transform:scale(1.06)}
+.m-temp{position:absolute;top:8px;right:8px;width:25px;height:25px;border-radius:8px;display:flex;align-items:center;justify-content:center;background:rgba(22,13,7,.55);color:#fff;backdrop-filter:blur(3px)}
+.m-temp svg{width:13px;height:13px}
+.m-badge{position:absolute;left:8px;bottom:8px;background:var(--accent);color:var(--accent-ink);font-size:9.5px;font-weight:800;letter-spacing:.09em;text-transform:uppercase;padding:4px 9px;border-radius:99px}
+.m-edit{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(24,15,8,.5);color:#fff;opacity:0;transition:.2s}
+.mcard:hover .m-edit{opacity:1}
+.m-edit svg{width:22px;height:22px}
+.m-body{padding:10px 12px 12px}
+.m-name{font-weight:700;font-size:13.5px;line-height:1.3;min-height:36px}
+.m-price{font-family:'JetBrains Mono';font-size:12.5px;color:var(--accent);font-weight:700;margin-top:5px}
+.empty{padding:44px 20px;text-align:center;color:var(--ink2)}
+.empty svg{width:40px;height:40px;opacity:.35;margin:0 auto 12px;display:block}
+.empty p{font-size:13.5px;line-height:1.55}
+.empty.slim{padding:22px 12px}
+.empty.slim svg{width:28px;height:28px;margin-bottom:8px}
+
+/* ============ DRAWER KERANJANG ============ */
+#cartOverlay{position:fixed;inset:0;background:rgba(22,14,9,.45);opacity:0;pointer-events:none;transition:opacity .3s;z-index:800}
+body.cart-open #cartOverlay{opacity:1;pointer-events:auto}
+#cartDrawer{position:fixed;top:0;right:0;bottom:0;width:min(438px,100%);background:var(--bg);border-left:1px solid var(--line);transform:translateX(105%);transition:transform .38s cubic-bezier(.22,.9,.32,1);z-index:801;display:flex;flex-direction:column}
+body.cart-open #cartDrawer{transform:none}
+.cd-head{display:flex;align-items:center;justify-content:space-between;padding:17px 19px;border-bottom:1px solid var(--line);background:var(--surface)}
+.cd-title{font-family:'Fraunces',serif;font-size:20px;font-weight:600}
+.cd-trx{font-family:'JetBrains Mono';font-size:11.5px;color:var(--ink2);margin-top:3px}
+.cd-trx b{color:var(--accent);font-weight:700}
+.cart-scroll{flex:1;overflow-y:auto;padding:16px 17px 20px}
+.cart-sec{margin-bottom:13px;padding:15px 16px;border:1px solid var(--line);border-radius:14px;background:var(--surface)}
+.cs-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;gap:10px}
+.cs-title{font-size:10.5px;font-weight:800;letter-spacing:.13em;text-transform:uppercase;color:var(--ink2)}
+.ci{padding:13px 14px;border:1px solid var(--line);border-radius:14px;background:var(--surface);margin-bottom:10px}
+.ci-top{display:flex;gap:12px;align-items:flex-start}
+.ci-qty{display:flex;align-items:center;gap:5px;padding-top:2px}
+.ci-qty button{width:25px;height:25px;border-radius:8px;border:1px solid var(--line);background:transparent;color:var(--ink2);display:flex;align-items:center;justify-content:center;transition:.15s}
+.ci-qty button:hover{border-color:var(--accent);color:var(--accent)}
+.ci-qty button svg{width:12px;height:12px}
+.ci-qty span{font-family:'JetBrains Mono';min-width:22px;text-align:center;font-weight:700}
+.ci-info{flex:1;min-width:0}
+.ci-name{font-weight:700;font-size:14px;line-height:1.25}
+.ci-price{font-family:'JetBrains Mono';font-size:11.5px;color:var(--ink2);margin-top:3px}
+.ci-temp{display:inline-flex;align-items:center;gap:5px;font-size:10.5px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--ink2);margin-top:5px}
+.ci-temp svg{width:11px;height:11px;color:var(--accent)}
+.ci-total{font-family:'JetBrains Mono';font-weight:700;font-size:13.5px;white-space:nowrap}
+.ci-opts{margin-top:11px;padding-top:11px;border-top:1px dashed var(--line)}
+.opt{display:flex;align-items:center;gap:10px;margin-top:7px}
+.opt:first-child{margin-top:0}
+.opt>span{font-size:10px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--ink2);width:42px;flex:none}
+.opt-seg{display:inline-flex;background:var(--surface2);border-radius:8px;padding:2px}
+.opt-seg button{border:0;background:none;padding:5px 12px;font-size:12px;color:var(--ink2);border-radius:6px;font-weight:600}
+.opt-seg button.on{background:var(--surface);color:var(--ink);font-weight:800;box-shadow:0 1px 5px rgba(20,12,6,.16)}
+.disc-row{display:flex;gap:8px}
+.disc-row .input{text-transform:uppercase;font-family:'JetBrains Mono';font-size:13px}
+.disc-ok{display:flex;align-items:center;gap:8px;margin-top:10px;color:var(--ok);font-size:12.5px;font-weight:700}
+.disc-err{display:flex;align-items:center;gap:8px;margin-top:10px;color:var(--err);font-size:12.5px;font-weight:600}
+.disc-ok svg,.disc-err svg{width:15px;height:15px}
+.pay-seg{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}
+.pay-seg button{display:flex;flex-direction:column;align-items:center;gap:7px;padding:13px 6px;border-radius:12px;border:1px solid var(--line);background:transparent;color:var(--ink2);font-weight:700;font-size:12.5px;transition:.16s}
+.pay-seg button svg{width:19px;height:19px}
+.pay-seg button:hover{border-color:var(--accent);color:var(--accent)}
+.pay-seg button.on{border-color:var(--accent);background:var(--accent-soft);color:var(--accent)}
+.cash-row{display:flex;align-items:center;gap:10px;margin-top:12px}
+.cash-row .input{font-family:'JetBrains Mono'}
+.cash-out{margin-top:9px;font-family:'JetBrains Mono';font-size:12.5px;font-weight:700}
+.cash-out.okc{color:var(--ok)}.cash-out.badc{color:var(--err)}
+#cartFoot{border-top:1px solid var(--line);padding:16px 19px 18px;background:var(--surface)}
+.sum-row{display:flex;justify-content:space-between;font-size:13.5px;color:var(--ink2);margin-bottom:7px}
+.sum-row.total{color:var(--ink);font-size:15px;font-weight:800;margin:11px 0 15px}
+.sum-row .mono{font-weight:700}
+
+/* ============ STRUK ============ */
+.rc{background:#FDFBF5;color:#241A10;font-family:'JetBrains Mono',monospace;font-size:11.5px;line-height:1.5;padding:22px 20px;border-radius:10px;width:302px;margin:0 auto;border:1px solid #E3DAC6}
+.rc-head{text-align:center;font-size:16px;font-weight:700;letter-spacing:.3em}
+.rc-sub{text-align:center;color:#6E5F49;font-size:10.5px}
+.rc-dash{border-top:1px dashed #B4A78E;margin:10px 0}
+.rc-row{display:flex;justify-content:space-between;gap:14px}
+.rc-total{font-size:14px;font-weight:700}
+.rc-opt{color:#8A7A60;font-size:10.5px;padding-left:10px}
+.rc-thanks{text-align:center;margin-top:8px;font-weight:600}
+.rc-tag{text-align:center;margin-top:4px;font-style:italic;color:#8A7A60}
+
+/* ============ TABEL (HISTORY & USER) ============ */
+.tbl{background:var(--surface);border:1px solid var(--line);border-radius:16px;overflow:hidden;margin-top:16px}
+.tbl table{width:100%;border-collapse:collapse}
+.tbl th{background:var(--surface2);font-size:10.5px;letter-spacing:.11em;text-transform:uppercase;color:var(--ink2);text-align:left;padding:13px 18px;font-weight:800;border-bottom:1px solid var(--line)}
+.tbl td{padding:13px 18px;border-bottom:1px solid var(--line);font-size:13.5px;vertical-align:middle}
+.tbl tr:last-child td{border-bottom:0}
+.tbl tbody tr{transition:background .15s}
+.tbl tbody tr:hover{background:color-mix(in srgb,var(--surface2) 55%,transparent)}
+.tbl tbody tr[data-act]{cursor:pointer}
+.h-no{font-weight:700;font-size:12px}
+.h-when b{display:block;font-size:13px}
+.h-when span{color:var(--ink2);font-size:12px}
+.h-item b{font-size:13px}
+.h-item span{color:var(--ink2);font-size:12px}
+.pay-pill{display:inline-flex;align-items:center;gap:7px;padding:6px 12px;border-radius:99px;font-size:12px;font-weight:700}
+.pay-pill svg{width:13px;height:13px}
+.p-cash{background:var(--accent-soft);color:var(--accent)}
+.p-qris{background:color-mix(in srgb,var(--ok) 16%,transparent);color:var(--ok)}
+.p-debit{background:var(--surface2);color:var(--ink2)}
+.h-total{font-weight:700}
+.t-act{display:flex;gap:8px;justify-content:flex-end}
+.uid{font-weight:700;font-size:12.5px}
+.pass{display:flex;align-items:center;gap:9px}
+.role-pill{font-size:10.5px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;padding:4px 11px;border-radius:99px}
+.rp-Kasir{background:var(--accent-soft);color:var(--accent)}
+.rp-Admin{background:color-mix(in srgb,var(--ok) 17%,transparent);color:var(--ok)}
+.rp-Superadmin{background:var(--ink);color:var(--bg)}
+
+/* ============ SETTINGS ============ */
+.set-card{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:22px 26px;margin-bottom:15px}
+.set-row{display:flex;align-items:center;justify-content:space-between;gap:18px;flex-wrap:wrap}
+.set-title{font-family:'Fraunces',serif;font-size:18px;font-weight:600}
+.set-desc{color:var(--ink2);font-size:13px;margin-top:4px;line-height:1.5}
+.acc-grid{display:grid;grid-template-columns:1fr 1.2fr;gap:26px;margin-top:20px}
+.acc-side{border-right:1px dashed var(--line);padding-right:26px}
+.acc-name{font-family:'Fraunces',serif;font-size:22px;font-weight:600}
+.acc-meta{font-family:'JetBrains Mono';font-size:12px;color:var(--ink2);margin-top:8px;line-height:2}
+.acc-meta b{color:var(--accent)}
+@media (max-width:880px){.acc-grid{grid-template-columns:1fr}.acc-side{border-right:0;padding-right:0;border-bottom:1px dashed var(--line);padding-bottom:20px;margin-bottom:6px}}
+
+/* ============ FORM ITEM ADMIN ============ */
+.if-grid{display:grid;grid-template-columns:300px 1fr;gap:34px;margin-top:22px;max-width:960px}
+.if-img{border:1px dashed var(--line);border-radius:16px;overflow:hidden;background:var(--surface);margin-bottom:14px}
+.if-img img{width:100%;aspect-ratio:4/3;object-fit:cover}
+.chk-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.chk{display:flex;align-items:center;gap:10px;border:1px solid var(--line);border-radius:11px;padding:11px 13px;font-size:13px;font-weight:600;cursor:pointer;background:var(--surface);transition:.15s}
+.chk:hover{border-color:var(--accent)}
+.chk input{accent-color:var(--accent);width:15px;height:15px}
+.chk.dis{opacity:.4;pointer-events:none}
+.hint{font-size:12px;color:var(--ink2);margin-top:9px;display:flex;align-items:center;gap:7px;line-height:1.4}
+.hint svg{width:13px;height:13px;flex:none}
+.if-actions{display:flex;justify-content:flex-end;gap:11px;margin-top:8px;padding-top:18px;border-top:1px dashed var(--line);flex-wrap:wrap}
+@media (max-width:920px){.if-grid{grid-template-columns:1fr}}
+
+/* ============ PRINT ============ */
+#printArea{display:none}
+@media print{
+  body{overflow:visible}
+  body::after{display:none}
+  #view-login,#view-app,#cartDrawer,#cartOverlay,#modalRoot,#toasts{display:none!important}
+  #printArea{display:block}
+  #printArea .rc{width:72mm;margin:0 auto;border:0;box-shadow:none;background:#fff;color:#000;padding:2mm 1mm;font-size:10.5px}
+}
+@page{margin:4mm}
+</style>
+</head>
+<body>
+
+<!-- ================= LOGIN (SEDUH POS — desain awal) ================= -->
+<div id="view-login">
+  <div class="login-left">
+    <div>
+      <div class="ll-brand">SEDUH<em>.</em></div>
+      <p class="ll-tag" data-i18n="tagline">Sistem kasir untuk kedai kopi &amp; dapur — pesanan, struk, dan laporan dalam satu tempat.</p>
+      <div class="ll-cup">
+        <svg class="cup" viewBox="0 0 140 175" fill="none">
+          <g class="steam">
+            <path class="s1" d="M50 88 C44 78 56 70 50 60 C45 52 54 46 50 36"/>
+            <path class="s2" d="M70 92 C64 80 76 72 70 60 C65 50 74 44 71 32"/>
+            <path class="s3" d="M90 88 C84 78 96 70 90 60 C85 52 94 46 90 36"/>
+          </g>
+          <path d="M38 100 h64 v26 a16 16 0 0 1-16 16 h-32 a16 16 0 0 1-16-16 z" stroke="currentColor" stroke-width="3"/>
+          <path d="M102 106 h9 a12 12 0 0 1 0 24 h-12" stroke="currentColor" stroke-width="3"/>
+          <path d="M30 158 h80" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+        </svg>
+      </div>
+    </div>
+    <div class="ll-foot">SEDUH POS · v1.2 · Yogyakarta</div>
+  </div>
+  <div class="login-right">
+    <form class="login-form" id="loginForm" novalidate>
+      <h1 class="lf-title" data-i18n="welcomeBack">Selamat datang kembali</h1>
+      <p class="lf-sub" data-i18n="loginSub">Masuk untuk melanjutkan shift Anda.</p>
+      <div class="form-err" id="loginErr"><i data-lucide="alert-circle"></i><span></span></div>
+      <label class="fl"><span data-i18n="userId">ID Pengguna</span>
+        <div class="field"><input class="input" id="loginUid" autocomplete="username" placeholder="USR-001"></div>
+      </label>
+      <label class="fl"><span data-i18n="password">Kata Sandi</span>
+        <div class="field">
+          <input class="input" id="loginPass" type="password" autocomplete="current-password" placeholder="••••••••">
+          <button type="button" class="eye" data-act="toggle-pass" data-target="loginPass"><i data-lucide="eye"></i></button>
+        </div>
+      </label>
+      <button class="btn big" type="submit" style="margin-top:6px"><i data-lucide="log-in"></i><span data-i18n="loginBtn">Masuk</span></button>
+      <div class="demo-box">
+        <div class="demo-lbl"><span data-i18n="demoAcc">Akun demo — klik untuk mengisi</span></div>
+        <button type="button" class="demo-chip" data-act="login-fill" data-uid="USR-001" data-pass="kopi123">
+          <span class="dc-role" data-i18n="asKasir">Masuk sebagai Kasir</span>
+          <span class="dc-cred mono">USR-001 · kopi123</span>
+        </button>
+        <button type="button" class="demo-chip" data-act="login-fill" data-uid="ADM-001" data-pass="admin123">
+          <span class="dc-role" data-i18n="asAdmin">Masuk sebagai Superadmin</span>
+          <span class="dc-cred mono">ADM-001 · admin123</span>
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ================= APP SHELL ================= -->
+<div id="view-app" hidden>
+  <aside id="sidebar">
+    <div class="sb-brand">
+      <svg class="sb-cup" viewBox="0 0 140 175" fill="none">
+        <path d="M38 100 h64 v26 a16 16 0 0 1-16 16 h-32 a16 16 0 0 1-16-16 z" stroke="currentColor" stroke-width="5"/>
+        <path d="M102 106 h9 a12 12 0 0 1 0 24 h-12" stroke="currentColor" stroke-width="5"/>
+        <path d="M30 158 h80" stroke="currentColor" stroke-width="5" stroke-linecap="round"/>
+      </svg>
+      <span class="sb-logo">SEDUH<em>.</em></span>
+      <span class="sb-pos">POS</span>
+    </div>
+    <nav id="nav"></nav>
+    <div id="sideUser"></div>
+  </aside>
+  <main id="main">
+    <div class="page" id="page-home"></div>
+    <div class="page" id="page-order"></div>
+    <div class="page" id="page-history"></div>
+    <div class="page" id="page-settings"></div>
+    <div class="page" id="page-listorder"></div>
+    <div class="page" id="page-listuser"></div>
+  </main>
+</div>
+
+<!-- keranjang -->
+<div id="cartOverlay" data-act="cart-close"></div>
+<aside id="cartDrawer">
+  <div class="cd-head">
+    <div>
+      <div class="cd-title" id="cdTitle">Order</div>
+      <div class="cd-trx" id="cdTrx"></div>
+    </div>
+    <button class="ibtn" data-act="cart-close"><i data-lucide="x"></i></button>
+  </div>
+  <div class="cart-scroll">
+    <div id="cartItems"></div>
+    <div id="cartDisc"></div>
+    <div id="cartPay"></div>
+  </div>
+  <footer id="cartFoot"></footer>
+</aside>
+
+<div id="modalRoot"></div>
+<div id="toasts"></div>
+<div id="printArea"></div>
+
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<script>
+/* ================================================================
+   SEDUH POS — satu file, murni lokal di browser
+   ================================================================ */
+
+/* ---------- UTIL ---------- */
+const $  = s => document.querySelector(s);
+const $$ = s => document.querySelectorAll(s);
+const fmt  = n => 'Rp' + Math.round(n).toLocaleString('id-ID');
+const pad2 = n => String(n).padStart(2,'0');
+const esc  = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const icons = () => { if (window.lucide) lucide.createIcons(); };
+const sameDay = (a,b) => a.getFullYear()===b.getFullYear() && a.getMonth()===b.getMonth() && a.getDate()===b.getDate();
+const locale = () => S.lang==='id' ? 'id-ID' : 'en-GB';
+const kfmt = v => v>=1000 ? Math.round(v/1000)+'rb' : String(v);
+
+/* ---------- DATABASE LOKAL ----------
+   Setiap kategori punya "jenis": 'minuman' (punya penyajian Hangat/Dingin)
+   atau 'makanan' (tanpa Hangat/Dingin). Jenis ini jugalah yang memandu
+   daftar "Terlaris · Minuman" di halaman Home. */
+const DB = {
+  cats: [
+    {name:'Coffee',     jenis:'minuman'},
+    {name:'Non-Coffee', jenis:'minuman'},
+    {name:'Food',       jenis:'makanan'},
+    {name:'Cemilan',    jenis:'makanan'},
+  ],
+  codes: { 'HEMAT10':10000, 'KOPIASIK':5000, 'SEDUH15':15000 },
+  menu: [
+    {id:'M01',name:'Es Kopi Susu Gula Aren',cat:'Coffee',price:22000,temp:'cold',sold:312,soldToday:34,seed:'kopi-susu',  opts:{lessIce:1,normalIce:1,lessSugar:1,normalSugar:1}},
+    {id:'M02',name:'Americano',             cat:'Coffee',price:20000,temp:'hot', sold:148,soldToday:18,seed:'americano',  opts:{lessIce:0,normalIce:0,lessSugar:1,normalSugar:1}},
+    {id:'M03',name:'Cappuccino',            cat:'Coffee',price:26000,temp:'hot', sold:132,soldToday:12,seed:'cappuccino', opts:{lessIce:0,normalIce:0,lessSugar:1,normalSugar:1}},
+    {id:'M04',name:'Es Kopi Hitam',         cat:'Coffee',price:18000,temp:'cold',sold:121,soldToday:15,seed:'es-kopi',    opts:{lessIce:1,normalIce:1,lessSugar:1,normalSugar:1}},
+    {id:'M05',name:'Caramel Latte',         cat:'Coffee',price:30000,temp:'hot', sold:98, soldToday:9, seed:'caramel',    opts:{lessIce:0,normalIce:0,lessSugar:1,normalSugar:1}},
+    {id:'M06',name:'Kopi Pandan Latte',     cat:'Coffee',price:27000,temp:'cold',sold:87, soldToday:11,seed:'pandan',     opts:{lessIce:1,normalIce:1,lessSugar:1,normalSugar:1}},
+    {id:'M07',name:'Es Teh Melati',         cat:'Non-Coffee',price:12000,temp:'cold',sold:204,soldToday:26,seed:'teh-melati',opts:{lessIce:1,normalIce:1,lessSugar:1,normalSugar:1}},
+    {id:'M08',name:'Matcha Latte',          cat:'Non-Coffee',price:28000,temp:'cold',sold:156,soldToday:21,seed:'matcha',  opts:{lessIce:1,normalIce:1,lessSugar:1,normalSugar:1}},
+    {id:'M09',name:'Cokelat Panas',         cat:'Non-Coffee',price:25000,temp:'hot', sold:88, soldToday:8, seed:'cokelat',  opts:{lessIce:0,normalIce:0,lessSugar:1,normalSugar:1}},
+    {id:'M10',name:'Es Jeruk Peras',        cat:'Non-Coffee',price:18000,temp:'cold',sold:95, soldToday:13,seed:'jeruk',   opts:{lessIce:1,normalIce:1,lessSugar:1,normalSugar:1}},
+    {id:'M11',name:'Lychee Yakult',         cat:'Non-Coffee',price:26000,temp:'cold',sold:112,soldToday:17,seed:'lychee',  opts:{lessIce:1,normalIce:1,lessSugar:1,normalSugar:1}},
+    {id:'M12',name:'Teh Tarik',             cat:'Non-Coffee',price:16000,temp:'hot', sold:76, soldToday:7, seed:'tarik',   opts:{lessIce:0,normalIce:0,lessSugar:1,normalSugar:1}},
+    {id:'M13',name:'Nasi Goreng Kampung',   cat:'Food',price:32000,temp:null,sold:141,soldToday:19,seed:'nasgor',   opts:{lessIce:0,normalIce:0,lessSugar:0,normalSugar:0}},
+    {id:'M14',name:'Ayam Geprek Matah',     cat:'Food',price:35000,temp:null,sold:118,soldToday:16,seed:'geprek',  opts:{lessIce:0,normalIce:0,lessSugar:0,normalSugar:0}},
+    {id:'M15',name:'Mie Goreng Jawa',       cat:'Food',price:28000,temp:null,sold:84, soldToday:9, seed:'mie',     opts:{lessIce:0,normalIce:0,lessSugar:0,normalSugar:0}},
+    {id:'M16',name:'Nasi Ayam Teriyaki',    cat:'Food',price:38000,temp:null,sold:66, soldToday:7, seed:'teriyaki',opts:{lessIce:0,normalIce:0,lessSugar:0,normalSugar:0}},
+    {id:'M17',name:'Pisang Goreng Madu',    cat:'Cemilan',price:15000,temp:null,sold:176,soldToday:24,seed:'pisgor', opts:{lessIce:0,normalIce:0,lessSugar:1,normalSugar:1}},
+    {id:'M18',name:'Kentang Goreng',        cat:'Cemilan',price:17000,temp:null,sold:168,soldToday:22,seed:'kentang',opts:{lessIce:0,normalIce:0,lessSugar:0,normalSugar:0}},
+    {id:'M19',name:'Croissant Butter',      cat:'Cemilan',price:20000,temp:null,sold:92, soldToday:10,seed:'croissant',opts:{lessIce:0,normalIce:0,lessSugar:0,normalSugar:0}},
+    {id:'M20',name:'Roti Bakar Cokelat',    cat:'Cemilan',price:19000,temp:null,sold:124,soldToday:14,seed:'roti',   opts:{lessIce:0,normalIce:0,lessSugar:1,normalSugar:1}},
+    {id:'M21',name:'Tahu Crispy Bumbu',     cat:'Cemilan',price:14000,temp:null,sold:71, soldToday:8, seed:'tahu',   opts:{lessIce:0,normalIce:0,lessSugar:0,normalSugar:0}},
+  ],
+  users: [
+    {uid:'USR-001',name:'Rian Pratama',      role:'Kasir',     pass:'kopi123',  phone:'0812-3345-2210'},
+    {uid:'USR-002',name:'Dinda Ayu Lestari', role:'Kasir',     pass:'kopi123',  phone:'0857-1122-8834'},
+    {uid:'USR-003',name:'Fajar Nugraha',     role:'Admin',     pass:'kopi123',  phone:'0819-4455-6712'},
+    {uid:'ADM-001',name:'Bagas Wicaksono',   role:'Superadmin',pass:'admin123', phone:'0811-9090-1123'},
+  ],
+};
+const catJenis = name => { const c = DB.cats.find(x=>x.name===name); return c ? c.jenis : 'makanan'; };
+const isDrink  = m => catJenis(m.cat)==='minuman';
+const img = m => m.img || `https://picsum.photos/seed/${m.seed}/400/300.jpg`;
+
+/* ---------- TRANSAKSI (seed history hari ini) ---------- */
+function genDate(){ const d=new Date(); return d.getFullYear()+pad2(d.getMonth()+1)+pad2(d.getDate()); }
+const at = (h,m)=>{ const d=new Date(); d.setHours(h,m,0,0); return d; };
+let TRX_SEQ = 41;
+const TX = [
+  {no:'TRX-'+genDate()+'-0041',ts:at(11,42),cashier:'Dinda Ayu Lestari',pay:'qris',items:[
+    {mid:'M01',name:'Es Kopi Susu Gula Aren',qty:3,price:22000,temp:'cold',opts:{lessIce:1,normalIce:1,lessSugar:1,normalSugar:1},ice:'normal',sugar:'normal'},
+    {mid:'M17',name:'Pisang Goreng Madu',qty:2,price:15000,temp:null,opts:{lessIce:0,normalIce:0,lessSugar:1,normalSugar:1},sugar:'normal'}],
+    sub:96000,disc:0,total:96000,cash:null,change:null},
+  {no:'TRX-'+genDate()+'-0040',ts:at(11,5),cashier:'Rian Pratama',pay:'debit',items:[
+    {mid:'M11',name:'Lychee Yakult',qty:2,price:26000,temp:'cold',opts:{lessIce:1,normalIce:1,lessSugar:1,normalSugar:1},ice:'less',sugar:'normal'}],
+    sub:52000,disc:0,total:52000,cash:null,change:null},
+  {no:'TRX-'+genDate()+'-0039',ts:at(10,34),cashier:'Dinda Ayu Lestari',pay:'cash',items:[
+    {mid:'M03',name:'Cappuccino',qty:1,price:26000,temp:'hot',opts:{lessIce:0,normalIce:0,lessSugar:1,normalSugar:1},sugar:'less'},
+    {mid:'M21',name:'Tahu Crispy Bumbu',qty:1,price:14000,temp:null,opts:{lessIce:0,normalIce:0,lessSugar:0,normalSugar:0}}],
+    sub:40000,disc:0,total:40000,cash:50000,change:10000},
+  {no:'TRX-'+genDate()+'-0038',ts:at(9,58),cashier:'Rian Pratama',pay:'qris',items:[
+    {mid:'M08',name:'Matcha Latte',qty:1,price:28000,temp:'cold',opts:{lessIce:1,normalIce:1,lessSugar:1,normalSugar:1},ice:'normal',sugar:'less'},
+    {mid:'M20',name:'Roti Bakar Cokelat',qty:2,price:19000,temp:null,opts:{lessIce:0,normalIce:0,lessSugar:1,normalSugar:1},sugar:'less'}],
+    sub:66000,disc:5000,discLabel:'KOPIASIK',total:61000,cash:null,change:null},
+  {no:'TRX-'+genDate()+'-0037',ts:at(9,21),cashier:'Dinda Ayu Lestari',pay:'debit',items:[
+    {mid:'M13',name:'Nasi Goreng Kampung',qty:1,price:32000,temp:null,opts:{lessIce:0,normalIce:0,lessSugar:0,normalSugar:0}},
+    {mid:'M10',name:'Es Jeruk Peras',qty:2,price:18000,temp:'cold',opts:{lessIce:1,normalIce:1,lessSugar:1,normalSugar:1},ice:'normal',sugar:'normal'}],
+    sub:68000,disc:0,total:68000,cash:null,change:null},
+  {no:'TRX-'+genDate()+'-0036',ts:at(8,47),cashier:'Rian Pratama',pay:'cash',items:[
+    {mid:'M07',name:'Es Teh Melati',qty:1,price:12000,temp:'cold',opts:{lessIce:1,normalIce:1,lessSugar:1,normalSugar:1},ice:'normal',sugar:'normal'},
+    {mid:'M18',name:'Kentang Goreng',qty:1,price:17000,temp:null,opts:{lessIce:0,normalIce:0,lessSugar:0,normalSugar:0}}],
+    sub:29000,disc:0,total:29000,cash:50000,change:21000},
+  {no:'TRX-'+genDate()+'-0035',ts:at(8,12),cashier:'Rian Pratama',pay:'qris',items:[
+    {mid:'M01',name:'Es Kopi Susu Gula Aren',qty:2,price:22000,temp:'cold',opts:{lessIce:1,normalIce:1,lessSugar:1,normalSugar:1},ice:'normal',sugar:'normal'}],
+    sub:44000,disc:0,total:44000,cash:null,change:null},
+];
+function genTrx(){ return 'TRX-'+genDate()+'-'+String(++TRX_SEQ).padStart(4,'0'); }
+
+/* ---------- STATE ---------- */
+let S = {
+  user:null, page:'home',
+  theme: localStorage.getItem('seduh-theme') || 'light',
+  lang:  localStorage.getItem('seduh-lang')  || 'id',
+  q:'', cat:'all', aq:'', acat:'all', hq:'', uq:'',
+  pay:'cash', cash:null, trxNo:null,
+  disc:{ type:'code', code:'', codeOk:null, codeBad:false, nom:0 },
+  itemPage:null, reveal:new Set(),
+};
+let cart = [];
+document.documentElement.dataset.theme = S.theme;
+
+/* ---------- I18N ---------- */
+const I18N = {
+id:{
+  tagline:'Sistem kasir untuk kedai kopi & dapur — pesanan, struk, dan laporan dalam satu tempat.',
+  welcomeBack:'Selamat datang kembali', loginSub:'Masuk untuk melanjutkan shift Anda.',
+  userId:'ID Pengguna', password:'Kata Sandi', loginBtn:'Masuk',
+  demoAcc:'Akun demo — klik untuk mengisi', asKasir:'Masuk sebagai Kasir', asAdmin:'Masuk sebagai Superadmin',
+  errFill:'Lengkapi ID dan kata sandi.', errCreds:'ID atau kata sandi salah.',
+  navHome:'Home', navOrder:'Order', navHistory:'History', navSettings:'Settings', navListOrder:'List Order', navListUser:'List User',
+  logout:'Keluar', kasirRole:'Kasir', adminRole:'Admin', saRole:'Superadmin',
+  welcome:'Selamat Datang', sold:'terjual', bestBadge:'Terlaris',
+  statSales:'Penjualan Hari Ini', statTrx:'Transaksi', statItems:'Item Terjual',
+  hourlyTitle:'Penjualan per Jam', hourlyEmpty:'Belum ada transaksi hari ini.',
+  secAll:'Terlaris · Semua Kategori', secCem:'Terlaris · Cemilan', secDrink:'Terlaris · Minuman', secToday:'Terjual Hari Ini',
+  orderSub:'Pilih menu, atur opsi pesanan, lalu selesaikan transaksi.',
+  searchMenu:'Cari menu…', allItems:'All Items', cemilan:'Cemilan', noResult:'Tidak ada hasil yang cocok.',
+  added:'ditambahkan ke pesanan',
+  orderLbl:'Order', emptyCart:'Belum ada pesanan.\nPilih menu dari daftar di sebelah kiri.',
+  ice:'Es', sugar:'Gula', normal:'Normal', less:'Less', cold:'Dingin', hot:'Hangat',
+  trxNoLbl:'No. Transaksi', trxNoPh:'—',
+  discount:'Diskon', byCode:'Kode', byNom:'Nominal', codePh:'Masukkan kode diskon', apply:'Terapkan',
+  codeBad:'Kode tidak tersedia di database.',
+  payLbl:'Metode Pembayaran', cash:'Cash', qris:'QRIS', debit:'Debit',
+  cashIn:'Uang Diterima', change:'Kembalian', insufficient:'Uang diterima kurang dari total.',
+  subtotal:'Subtotal', total:'Total', checkout:'Selesaikan Transaksi',
+  confirmTitle:'Apakah pesanan sudah benar?', printReceipt:'Cetak Struk', noPrint:'Selesai tanpa cetak', back:'Kembali',
+  histTitle:'History Penjualan', histSub:'Semua transaksi yang telah selesai.', searchTrx:'Cari nomor transaksi…',
+  colNo:'No', colWhen:'Tanggal & Waktu', colCashier:'Kasir', colItem:'Item', colPay:'Metode', colTotal:'Total',
+  more:'+n lainnya', reprint:'Cetak Ulang', items:'item',
+  setTitle:'Settings', setSub:'Sesuaikan tampilan, bahasa, dan akun Anda.',
+  appearance:'Tema', themeDesc:'Ubah tema aplikasi menjadi terang atau gelap.', light:'Terang', dark:'Gelap',
+  language:'Bahasa', langDesc:'Bahasa antarmuka aplikasi.',
+  bugTitle:'Laporan Bug', bugDesc:'Menemukan kendala di aplikasi? Laporkan ke tim pengembang.',
+  bugOpenBtn:'Laporkan Bug', bugSum:'Ringkasan', bugSumPh:'Ringkasan singkat masalah', bugSteps:'Detail', bugStepsPh:'Langkah reproduksi…', bugSend:'Kirim Laporan',
+  bugSent:'Laporan terkirim. Terima kasih!', fillAll:'Lengkapi semua kolom.',
+  account:'Akun', accDesc:'Perbarui kata sandi dan nomor HP Anda.',
+  curPass:'Kata Sandi Lama', newPass:'Kata Sandi Baru', confPass:'Konfirmasi Kata Sandi',
+  savePassBtn:'Ubah Kata Sandi', phoneLbl:'Nomor HP', savePhoneBtn:'Simpan Nomor HP',
+  passWrong:'Kata sandi lama salah.', passShort:'Kata sandi minimal 6 karakter.', passMismatch:'Konfirmasi tidak sama.',
+  phoneBad:'Nomor HP tidak valid.', savedToast:'Perubahan tersimpan.',
+  menuHint:'Klik menu untuk mengedit.',
+  itemEditTitle:'Edit Menu', itemNewTitle:'Tambah Menu Baru', backList:'Kembali ke daftar',
+  itemName:'Nama Menu', itemNamePh:'cth: Es Kopi Susu Gula Aren', itemCat:'Kategori',
+  otherCat:'Kategori lain…', newCat:'Kategori Baru', newCatPh:'Nama kategori baru',
+  jenisLbl:'Jenis Kategori', jenisMakanan:'Makanan', jenisMinuman:'Minuman',
+  jenisDrinkHint:'Kategori berjenis Minuman — pilihan penyajian Hangat/Dingin aktif.',
+  jenisFoodHint:'Kategori berjenis Makanan — tanpa pilihan Hangat/Dingin.',
+  serve:'Penyajian', optsTitle:'Opsi Item', optsDesc:'Centang opsi yang tersedia untuk item ini.',
+  iceOnlyCold:'Opsi es hanya relevan untuk penyajian Dingin.',
+  price:'Harga', changeImg:'Ganti Gambar',
+  saveEdit:'Edit Items', addBtn:'Tambahkan Items', cancelEdit:'Cancel Edit', cancelAdd:'Cancel Items',
+  deleteItem:'Hapus Items', delItemT:'Hapus Menu', delItemConfirm:'Hapus menu ini dari daftar? Tindakan ini tidak dapat dibatalkan.',
+  itemInvalid:'Lengkapi nama dan harga menu.', catNeeded:'Nama kategori baru wajib diisi.',
+  itemSaved:'Menu berhasil disimpan.', itemAdded:'Menu baru ditambahkan.', itemDeleted:'Menu dihapus.',
+  userTitle:'List User', userSub:'Kelola akun kasir dan admin.', searchUser:'Cari ID, nama, atau posisi…',
+  colId:'ID', colName:'Nama', colRole:'Posisi', colPass:'Kata Sandi', colPhone:'No. HP', colAct:'Aksi',
+  editUser:'Edit User', addUserT:'Tambah User', delUserT:'Hapus User',
+  delConfirm:'Hapus user ini? Tindakan ini tidak dapat dibatalkan.', del:'Hapus',
+  uidLocked:'ID tidak dapat diubah', userSaved:'Data user tersimpan.', userDeleted:'User dihapus.',
+  userAdded:'User baru ditambahkan.', cannotSelf:'Tidak dapat menghapus akun yang sedang digunakan.',
+  cancel:'Batal', save:'Simpan',
+  rcShop:'SEDUH COFFEE & KITCHEN', rcAddr:'Jl. Cempaka No. 12, Yogyakarta',
+  rcCashier:'Kasir', rcSub:'Subtotal', rcDisc:'Diskon', rcTotal:'TOTAL', rcPay:'Bayar', rcChange:'Kembali',
+  rcThanks:'Terima kasih! Sampai jumpa lagi.',
+  trxDone:'Transaksi selesai:',
+},
+en:{
+  tagline:'Point of sale for coffee shops & kitchens — orders, receipts, and reports in one place.',
+  welcomeBack:'Welcome back', loginSub:'Sign in to continue your shift.',
+  userId:'User ID', password:'Password', loginBtn:'Sign in',
+  demoAcc:'Demo accounts — click to fill', asKasir:'Sign in as Cashier', asAdmin:'Sign in as Superadmin',
+  errFill:'Fill in your ID and password.', errCreds:'Wrong ID or password.',
+  navHome:'Home', navOrder:'Order', navHistory:'History', navSettings:'Settings', navListOrder:'List Order', navListUser:'List User',
+  logout:'Sign out', kasirRole:'Cashier', adminRole:'Admin', saRole:'Superadmin',
+  welcome:'Welcome', sold:'sold', bestBadge:'Best Seller',
+  statSales:"Today's Sales", statTrx:'Transactions', statItems:'Items Sold',
+  hourlyTitle:'Sales per Hour', hourlyEmpty:'No transactions yet today.',
+  secAll:'Best Sellers · All Categories', secCem:'Best Sellers · Snacks', secDrink:'Best Sellers · Drinks', secToday:'Sold Today',
+  orderSub:'Pick menus, set order options, then complete the transaction.',
+  searchMenu:'Search menu…', allItems:'All Items', cemilan:'Snacks', noResult:'No matching results.',
+  added:'added to the order',
+  orderLbl:'Order', emptyCart:'No items yet.\nPick menus from the list on the left.',
+  ice:'Ice', sugar:'Sugar', normal:'Normal', less:'Less', cold:'Cold', hot:'Hot',
+  trxNoLbl:'Transaction No.', trxNoPh:'—',
+  discount:'Discount', byCode:'Code', byNom:'Amount', codePh:'Enter discount code', apply:'Apply',
+  codeBad:'Code not found in database.',
+  payLbl:'Payment Method', cash:'Cash', qris:'QRIS', debit:'Debit',
+  cashIn:'Cash Received', change:'Change', insufficient:'Cash received is less than total.',
+  subtotal:'Subtotal', total:'Total', checkout:'Complete Transaction',
+  confirmTitle:'Is the order correct?', printReceipt:'Print Receipt', noPrint:'Finish without printing', back:'Back',
+  histTitle:'Sales History', histSub:'All completed transactions.', searchTrx:'Search transaction no…',
+  colNo:'No', colWhen:'Date & Time', colCashier:'Cashier', colItem:'Item', colPay:'Method', colTotal:'Total',
+  more:'+n more', reprint:'Reprint', items:'items',
+  setTitle:'Settings', setSub:'Customize appearance, language, and your account.',
+  appearance:'Theme', themeDesc:'Switch the app theme to light or dark.', light:'Light', dark:'Dark',
+  language:'Language', langDesc:'Interface language of the app.',
+  bugTitle:'Bug Report', bugDesc:'Found an issue in the app? Report it to the dev team.',
+  bugOpenBtn:'Report a Bug', bugSum:'Summary', bugSumPh:'Brief issue summary', bugSteps:'Details', bugStepsPh:'Steps to reproduce…', bugSend:'Send Report',
+  bugSent:'Report sent. Thank you!', fillAll:'Fill in all fields.',
+  account:'Account', accDesc:'Update your password and phone number.',
+  curPass:'Current Password', newPass:'New Password', confPass:'Confirm Password',
+  savePassBtn:'Change Password', phoneLbl:'Phone Number', savePhoneBtn:'Save Phone Number',
+  passWrong:'Current password is wrong.', passShort:'Password must be at least 6 characters.', passMismatch:'Confirmation does not match.',
+  phoneBad:'Invalid phone number.', savedToast:'Changes saved.',
+  menuHint:'Click a menu to edit it.',
+  itemEditTitle:'Edit Menu', itemNewTitle:'Add New Menu', backList:'Back to list',
+  itemName:'Menu Name', itemNamePh:'e.g. Iced Palm Sugar Milk Coffee', itemCat:'Category',
+  otherCat:'Other category…', newCat:'New Category', newCatPh:'New category name',
+  jenisLbl:'Category Type', jenisMakanan:'Food', jenisMinuman:'Drink',
+  jenisDrinkHint:'This is a Drink category — Hot/Cold serving options are active.',
+  jenisFoodHint:'This is a Food category — no Hot/Cold serving options.',
+  serve:'Serving', optsTitle:'Item Options', optsDesc:'Check the options available for this item.',
+  iceOnlyCold:'Ice options are only relevant for Cold serving.',
+  price:'Price', changeImg:'Change Image',
+  saveEdit:'Edit Items', addBtn:'Add Items', cancelEdit:'Cancel Edit', cancelAdd:'Cancel Items',
+  deleteItem:'Delete Items', delItemT:'Delete Menu', delItemConfirm:'Delete this menu from the list? This action cannot be undone.',
+  itemInvalid:'Fill in the menu name and price.', catNeeded:'New category name is required.',
+  itemSaved:'Menu saved.', itemAdded:'New menu added.', itemDeleted:'Menu deleted.',
+  userTitle:'List User', userSub:'Manage cashier and admin accounts.', searchUser:'Search by ID, name, or role…',
+  colId:'ID', colName:'Name', colRole:'Role', colPass:'Password', colPhone:'Phone', colAct:'Actions',
+  editUser:'Edit User', addUserT:'Add User', delUserT:'Delete User',
+  delConfirm:'Delete this user? This action cannot be undone.', del:'Delete',
+  uidLocked:'ID cannot be changed', userSaved:'User data saved.', userDeleted:'User deleted.',
+  userAdded:'New user added.', cannotSelf:'Cannot delete the account currently in use.',
+  cancel:'Cancel', save:'Save',
+  rcShop:'SEDUH COFFEE & KITCHEN', rcAddr:'Jl. Cempaka No. 12, Yogyakarta',
+  rcCashier:'Cashier', rcSub:'Subtotal', rcDisc:'Discount', rcTotal:'TOTAL', rcPay:'Paid', rcChange:'Change',
+  rcThanks:'Thank you! See you again.',
+  trxDone:'Transaction completed:',
+}};
+const t = k => (I18N[S.lang] && I18N[S.lang][k]) ?? I18N.id[k] ?? k;
+const roleT = r => r==='Kasir' ? t('kasirRole') : r==='Admin' ? t('adminRole') : t('saRole');
+const catLbl = c => c==='all' ? t('allItems') : c==='Cemilan' ? t('cemilan') : c;
+/* aman: hanya mengganti elemen daun — tidak akan pernah menimpa input/form */
+function applyI18n(){
+  document.documentElement.lang = S.lang;
+  $$('[data-i18n]').forEach(el => {
+    if (el.querySelector('input,button,select,textarea,img')) return;
+    el.textContent = t(el.dataset.i18n);
+  });
+}
+
+/* ---------- TOAST ---------- */
+function toast(msg, type='ok'){
+  const el = document.createElement('div');
+  el.className = 'toast ' + type;
+  const ic = type==='ok' ? 'check-circle' : type==='err' ? 'alert-circle' : 'info';
+  el.innerHTML = `<i data-lucide="${ic}"></i><span></span>`;
+  el.querySelector('span').textContent = msg;
+  $('#toasts').appendChild(el);
+  icons();
+  setTimeout(()=>{ el.classList.add('out'); setTimeout(()=>el.remove(), 320); }, 2800);
+}
+
+/* ---------- MODAL ---------- */
+const modalRoot = $('#modalRoot');
+function openModal(html, cls=''){
+  modalRoot.innerHTML = `<div class="modal ${cls}">${html}</div>`;
+  modalRoot.classList.add('open');
+  icons();
+}
+function closeModal(){ modalRoot.classList.remove('open'); modalRoot.innerHTML=''; }
+modalRoot.addEventListener('click', e => { if (e.target === modalRoot) closeModal(); });
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape'){ closeModal(); document.body.classList.remove('cart-open'); }
+});
+
+/* ================================================================
+   LOGIN
+   ================================================================ */
+function doLogin(){
+  const uid = $('#loginUid').value.trim(), pw = $('#loginPass').value;
+  const err = $('#loginErr');
+  const showErr = m => { err.querySelector('span').textContent = m; err.classList.add('show'); };
+  if (!uid || !pw){ showErr(t('errFill')); return; }
+  const u = DB.users.find(x => x.uid.toLowerCase()===uid.toLowerCase() && x.pass===pw);
+  if (!u){ showErr(t('errCreds')); $('#loginPass').value=''; return; }
+  err.classList.remove('show');
+  S.user = u; S.page = 'home';
+  $('#view-login').hidden = true; $('#view-app').hidden = false;
+  renderSidebar(); go('home');
+  toast(`${t('welcome')}, ${u.name.split(' ')[0]}`, 'ok');
+}
+ $('#loginForm').addEventListener('submit', e => { e.preventDefault(); doLogin(); });
+
+function doLogout(){
+  cart = []; S.trxNo = null;
+  S.disc = {type:'code',code:'',codeOk:null,codeBad:false,nom:0}; S.cash = null;
+  S.user = null; S.itemPage = null; S.reveal.clear();
+  document.body.classList.remove('cart-open'); closeModal();
+  $('#view-app').hidden = true; $('#view-login').hidden = false;
+  $('#loginUid').value = ''; $('#loginPass').value = '';
+}
+
+/* ================================================================
+   NAVIGASI
+   ================================================================ */
+function renderSidebar(){
+  const admin = S.user && S.user.role !== 'Kasir';
+  const items = [
+    ['home','home',t('navHome')],
+    ['order','coffee',t('navOrder')],
+  ];
+  if (admin) items.push(['listorder','clipboard-list',t('navListOrder')], ['listuser','users',t('navListUser')]);
+  items.push(['history','history',t('navHistory')], ['settings','settings',t('navSettings')]);
+  $('#nav').innerHTML = items.map(([p,ic,l]) =>
+    `<button class="nav-item ${S.page===p?'active':''}" data-act="nav" data-page="${p}"><i data-lucide="${ic}"></i><span>${l}</span></button>`
+  ).join('');
+  const ini = S.user.name.split(' ').map(w=>w[0]).slice(0,2).join('').toUpperCase();
+  $('#sideUser').innerHTML = `
+    <div class="su-ava">${ini}</div>
+    <div class="su-info"><div class="su-name">${esc(S.user.name)}</div><div class="su-role">${roleT(S.user.role)}</div></div>
+    <button class="ibtn" data-act="logout" title="${t('logout')}"><i data-lucide="log-out"></i></button>`;
+  icons();
+}
+function go(p){
+  S.page = p;
+  $$('#nav .nav-item').forEach(b => b.classList.toggle('active', b.dataset.page===p));
+  $$('.page').forEach(el => el.classList.toggle('on', el.id==='page-'+p));
+  renderActive();
+  $('#main').scrollTop = 0;
+}
+function renderActive(){
+  ({home:renderHome, order:renderOrder, history:renderHistory, settings:renderSettings,
+    listorder:renderListOrder, listuser:renderUsers})[S.page]?.();
+}
+
+/* ================================================================
+   HOME — chart & bar ringkas (hemat ruang)
+   ================================================================ */
+function barRow(m, i, max, field){
+  const w = max>0 ? Math.max(4, Math.round(m[field]/max*100)) : 4;
+  return `
+  <button class="brow ${i===0?'top':''}" data-act="add-cart" data-id="${m.id}" title="${esc(m.name)} · ${fmt(m.price)}">
+    <span class="b-rank">${i+1}</span>
+    <img class="b-thumb" src="${img(m)}" alt="" loading="lazy">
+    <span class="b-main">
+      <span class="b-name"><span>${esc(m.name)}</span><span class="b-price">${fmt(m.price)}</span></span>
+      <span class="b-track"><i style="width:${w}%"></i></span>
+    </span>
+    <span class="b-side"><span class="b-qty">${m[field]}</span><span class="b-lbl">${t('sold')}</span></span>
+  </button>`;
+}
+const panel = (title, count, rows) => `
+  <div class="panel">
+    <div class="p-head"><span class="p-title">${title}</span><span class="p-count">${count} ${t('items')}</span></div>
+    ${rows}
+  </div>`;
+function hourlyChart(){
+  const todayTx = TX.filter(x=>sameDay(x.ts,new Date()));
+  const map = {};
+  todayTx.forEach(x=>{ const h=x.ts.getHours(); map[h]=(map[h]||0)+x.total; });
+  const hours = Object.keys(map).map(Number).sort((a,b)=>a-b);
+  if (!hours.length) return `<div class="empty slim"><i data-lucide="chart-column"></i><p>${t('hourlyEmpty')}</p></div>`;
+  const lo = hours[0], hi = hours[hours.length-1];
+  const cols = [];
+  for (let h=lo; h<=hi; h++) cols.push({h, v: map[h]||0});
+  const mx = Math.max(...cols.map(c=>c.v), 1);
+  return `<div class="vchart">
+    ${cols.map(c=>`
+      <div class="vcol" title="${pad2(c.h)}:00 — ${fmt(c.v)}">
+        <span class="v-val">${c.v ? kfmt(c.v) : ''}</span>
+        <div class="v-barw"><i class="v-bar" style="height:${c.v ? Math.max(5, Math.round(c.v/mx*100)) : 3}%"></i></div>
+        <span class="v-lbl">${pad2(c.h)}</span>
+      </div>`).join('')}
+  </div>`;
+}
+function renderHome(){
+  const sorted = [...DB.menu].sort((a,b)=>b.sold-a.sold);
+  const all5  = sorted.slice(0,5);
+  const cem5  = sorted.filter(m=>m.cat==='Cemilan').slice(0,5);
+  const drk7  = sorted.filter(m=>isDrink(m)).slice(0,7);   // dipandu oleh jenis kategori
+  const today = [...DB.menu].sort((a,b)=>b.soldToday-a.soldToday).slice(0,8);
+
+  const todayTx = TX.filter(x=>sameDay(x.ts,new Date()));
+  const sales = todayTx.reduce((s,x)=>s+x.total,0);
+  const itemsN = todayTx.reduce((s,x)=>s+x.items.reduce((a,i)=>a+i.qty,0),0);
+
+  const rows = (arr,field) => {
+    const max = arr[0]?.[field] || 1;
+    return arr.map((m,i)=>barRow(m,i,max,field)).join('');
+  };
+
+  $('#page-home').innerHTML = `
+    <div class="hero">
+      <div class="hero-over">SEDUH POS · POINT OF SALE</div>
+      <h1 class="hero-title">${t('welcome')}, <em>${roleT(S.user.role)}!</em></h1>
+      <div class="hero-tag">Good Coffee Good Mood</div>
+      <div class="hero-sub">
+        <i data-lucide="calendar"></i><span>${new Date().toLocaleDateString(locale(),{weekday:'long',day:'numeric',month:'long',year:'numeric'})}</span>
+        <span>·</span>
+        <i data-lucide="user-round-check"></i><span>${esc(S.user.name)}</span>
+      </div>
+      <svg class="hero-cup" viewBox="0 0 140 175" fill="none">
+        <g class="steam"><path class="s1" d="M50 88 C44 78 56 70 50 60 C45 52 54 46 50 36"/><path class="s2" d="M70 92 C64 80 76 72 70 60 C65 50 74 44 71 32"/><path class="s3" d="M90 88 C84 78 96 70 90 60 C85 52 94 46 90 36"/></g>
+        <path d="M38 100 h64 v26 a16 16 0 0 1-16 16 h-32 a16 16 0 0 1-16-16 z" stroke="currentColor" stroke-width="3"/>
+        <path d="M102 106 h9 a12 12 0 0 1 0 24 h-12" stroke="currentColor" stroke-width="3"/>
+        <path d="M30 158 h80" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+      </svg>
+    </div>
+    <div class="stat-strip">
+      <div class="stat"><div class="stat-num">${fmt(sales)}</div><div class="stat-lbl">${t('statSales')}</div></div>
+      <div class="stat"><div class="stat-num">${todayTx.length}</div><div class="stat-lbl">${t('statTrx')}</div></div>
+      <div class="stat"><div class="stat-num">${itemsN}</div><div class="stat-lbl">${t('statItems')}</div></div>
+    </div>
+    <div class="panel" style="margin-top:15px">
+      <div class="p-head"><span class="p-title">${t('hourlyTitle')}</span><span class="p-count">${todayTx.length} ${t('statTrx')}</span></div>
+      ${hourlyChart()}
+    </div>
+    <div class="home-grid">
+      ${panel(t('secAll'), 5, rows(all5,'sold'))}
+      ${panel(t('secDrink'), 7, rows(drk7,'sold'))}
+      ${panel(t('secCem'), 5, rows(cem5,'sold'))}
+      ${panel(t('secToday'), today.length, rows(today,'soldToday'))}
+    </div>`;
+  icons();
+}
+
+/* ================================================================
+   ORDER (KASIR)
+   ================================================================ */
+function menuGridHTML(act, cat, q){
+  q = (q||'').trim().toLowerCase();
+  const list = DB.menu.filter(m => (cat==='all'||m.cat===cat) && (!q || m.name.toLowerCase().includes(q)));
+  if (!list.length) return `<div class="empty"><i data-lucide="search-x"></i><p>${t('noResult')}</p></div>`;
+  const top3 = {}; [...DB.menu].sort((a,b)=>b.sold-a.sold).slice(0,3).forEach((m,i)=>top3[m.id]=i+1);
+  return `<div class="menu-grid">${list.map(m=>`
+    <button class="mcard" data-act="${act}" data-id="${m.id}">
+      <div class="m-img">
+        <img src="${img(m)}" alt="" loading="lazy">
+        ${m.temp ? `<span class="m-temp"><i data-lucide="${m.temp==='cold'?'snowflake':'flame'}"></i></span>` : ''}
+        ${top3[m.id] ? `<span class="m-badge">${t('bestBadge')}</span>` : ''}
+        ${act==='item-edit' ? `<span class="m-edit"><i data-lucide="pencil"></i></span>` : ''}
+      </div>
+      <div class="m-body"><div class="m-name">${esc(m.name)}</div><div class="m-price">${fmt(m.price)}</div></div>
+    </button>`).join('')}</div>`;
+}
+const chipHTML = (act,val,label,cur) =>
+  `<button class="chip ${cur===val?'on':''}" data-act="${act}" data-val="${val}">${label}</button>`;
+function ddHTML(id, act, cur, scope){
+  const opts = ['all', ...DB.cats.map(c=>c.name)];
+  return `
+  <div class="dd" id="${id}">
+    <button class="dd-btn" data-act="dd-toggle"><i data-lucide="list-filter"></i><span>${catLbl(cur)}</span><i data-lucide="chevron-down"></i></button>
+    <div class="dd-menu">
+      ${opts.map(c=>`<div class="dd-item" data-act="${act}" data-val="${c}" data-scope="${scope}"><span>${catLbl(c)}</span>${cur===c?'<i data-lucide="check"></i>':''}</div>`).join('')}
+    </div>
+  </div>`;
+}
+function renderOrder(){
+  const n = cart.reduce((s,i)=>s+i.qty,0);
+  $('#page-order').innerHTML = `
+    <div class="page-head">
+      <div><h1 class="ph-title">${t('navOrder')}</h1><p class="ph-sub">${t('orderSub')}</p></div>
+    </div>
+    <div class="o-row1">
+      <div class="search"><i data-lucide="search"></i><input data-input="order-q" value="${esc(S.q)}" placeholder="${t('searchMenu')}"></div>
+    </div>
+    <div class="o-row2">
+      ${chipHTML('chip','all',t('allItems'),S.cat)}
+      ${ddHTML('catDD','dd-pick',S.cat,'order')}
+      ${chipHTML('chip','Coffee','Coffee',S.cat)}
+      ${chipHTML('chip','Non-Coffee','Non-Coffee',S.cat)}
+      ${chipHTML('chip','Food','Food',S.cat)}
+      <button class="cart-btn" data-act="cart-open" title="${t('orderLbl')}">
+        <i data-lucide="shopping-bag"></i>
+        <span class="cart-badge ${n?'':'hide'}">${n}</span>
+      </button>
+    </div>
+    <div id="menuGrid">${menuGridHTML('add-cart', S.cat, S.q)}</div>`;
+  icons();
+}
+
+/* ================================================================
+   KERANJANG / TRANSAKSI
+   ================================================================ */
+const cartSub  = () => cart.reduce((s,i)=>s+i.price*i.qty,0);
+function cartDisc(){
+  if (S.disc.type==='code' && S.disc.codeOk!=null) return Math.min(S.disc.codeOk, cartSub());
+  if (S.disc.type==='nom') return Math.min(S.disc.nom||0, cartSub());
+  return 0;
+}
+const cartTotal = () => Math.max(0, cartSub()-cartDisc());
+
+function addToCart(id){
+  const m = DB.menu.find(x=>x.id===id); if(!m) return;
+  const opts = m.opts || {lessIce:0,normalIce:0,lessSugar:0,normalSugar:0};
+  const base = {
+    mid:m.id, name:m.name, price:m.price, qty:1, temp:m.temp, opts,
+    ice:  opts.normalIce ? 'normal' : 'less',
+    sugar:opts.normalSugar ? 'normal' : 'less',
+  };
+  const i = cart.findIndex(c => c.mid===base.mid && c.temp===base.temp && c.ice===base.ice && c.sugar===base.sugar);
+  if (i>-1) cart[i].qty++; else cart.push(base);
+  if (!S.trxNo) S.trxNo = genTrx();
+  updateCartBadge(true);
+  if (document.body.classList.contains('cart-open')){ renderCartItems(); renderCartFoot(); }
+  else toast(`${m.name} ${t('added')}`, 'info');
+}
+function updateCartBadge(bump){
+  const btn = $('#page-order .cart-btn'); if (!btn) return;
+  const n = cart.reduce((s,i)=>s+i.qty,0);
+  const b = btn.querySelector('.cart-badge');
+  b.textContent = n; b.classList.toggle('hide', !n);
+  if (bump){ btn.classList.remove('bump'); void btn.offsetWidth; btn.classList.add('bump'); }
+}
+
+function renderCartAll(){
+  $('#cdTitle').textContent = t('orderLbl');
+  $('#cdTrx').innerHTML = `${t('trxNoLbl')}: <b>${S.trxNo || t('trxNoPh')}</b>`;
+  renderCartItems(); renderDisc(); renderPay(); renderCartFoot();
+}
+function renderCartItems(){
+  const box = $('#cartItems');
+  if (!cart.length){
+    box.innerHTML = `<div class="empty"><i data-lucide="shopping-bag"></i><p>${t('emptyCart').replace('\n','<br>')}</p></div>`;
+    icons(); return;
+  }
+  box.innerHTML = cart.map((it,i)=>{
+    const hasIce   = it.temp==='cold' && (it.opts.lessIce || it.opts.normalIce);
+    const hasSugar = it.opts.lessSugar || it.opts.normalSugar;
+    return `
+    <div class="ci">
+      <div class="ci-top">
+        <div class="ci-qty">
+          <button data-act="qty-dec" data-i="${i}"><i data-lucide="minus"></i></button>
+          <span>${it.qty}</span>
+          <button data-act="qty-inc" data-i="${i}"><i data-lucide="plus"></i></button>
+        </div>
+        <div class="ci-info">
+          <div class="ci-name">${esc(it.name)}</div>
+          <div class="ci-price">${fmt(it.price)} / pcs</div>
+          ${it.temp ? `<span class="ci-temp"><i data-lucide="${it.temp==='cold'?'snowflake':'flame'}"></i>${it.temp==='cold'?t('cold'):t('hot')}</span>` : ''}
+        </div>
+        <div class="ci-total">${fmt(it.price*it.qty)}</div>
+      </div>
+      ${(hasIce||hasSugar) ? `
+      <div class="ci-opts">
+        ${hasIce ? `
+        <div class="opt"><span>${t('ice')}</span>
+          <div class="opt-seg">
+            ${it.opts.normalIce?`<button class="${it.ice==='normal'?'on':''}" data-act="opt" data-i="${i}" data-kind="ice" data-val="normal">${t('normal')}</button>`:''}
+            ${it.opts.lessIce?`<button class="${it.ice==='less'?'on':''}" data-act="opt" data-i="${i}" data-kind="ice" data-val="less">${t('less')}</button>`:''}
+          </div>
+        </div>` : ''}
+        ${hasSugar ? `
+        <div class="opt"><span>${t('sugar')}</span>
+          <div class="opt-seg">
+            ${it.opts.normalSugar?`<button class="${it.sugar==='normal'?'on':''}" data-act="opt" data-i="${i}" data-kind="sugar" data-val="normal">${t('normal')}</button>`:''}
+            ${it.opts.lessSugar?`<button class="${it.sugar==='less'?'on':''}" data-act="opt" data-i="${i}" data-kind="sugar" data-val="less">${t('less')}</button>`:''}
+          </div>
+        </div>` : ''}
+      </div>` : ''}
+    </div>`;
+  }).join('');
+  icons();
+}
+function renderDisc(){
+  const d = S.disc;
+  $('#cartDisc').innerHTML = `
+  <div class="cart-sec">
+    <div class="cs-head">
+      <span class="cs-title">${t('discount')}</span>
+      <div class="dd up">
+        <button class="dd-btn" data-act="dd-toggle"><span>${d.type==='code'?t('byCode'):t('byNom')}</span><i data-lucide="chevron-down"></i></button>
+        <div class="dd-menu">
+          <div class="dd-item" data-act="disc-type" data-val="code"><span>${t('byCode')}</span>${d.type==='code'?'<i data-lucide="check"></i>':''}</div>
+          <div class="dd-item" data-act="disc-type" data-val="nom"><span>${t('byNom')}</span>${d.type==='nom'?'<i data-lucide="check"></i>':''}</div>
+        </div>
+      </div>
+    </div>
+    ${d.type==='code' ? `
+      <div class="disc-row">
+        <input class="input" data-input="disc-code" value="${esc(d.code)}" placeholder="${t('codePh')}">
+        <button class="btn-ghost" data-act="apply-code">${t('apply')}</button>
+      </div>
+      ${d.codeOk!=null ? `<div class="disc-ok"><i data-lucide="badge-check"></i><span class="mono">${esc(d.code)} · −${fmt(d.codeOk)}</span></div>` : ''}
+      ${d.codeBad ? `<div class="disc-err"><i data-lucide="alert-circle"></i><span>${t('codeBad')}</span></div>` : ''}
+    ` : `
+      <div class="disc-row">
+        <span class="mono" style="font-size:13px;color:var(--ink2)">Rp</span>
+        <input class="input" type="number" min="0" data-input="disc-nom" value="${d.nom||''}" placeholder="0">
+      </div>
+    `}
+  </div>`;
+  icons();
+}
+function renderPay(){
+  $('#cartPay').innerHTML = `
+  <div class="cart-sec">
+    <div class="cs-head"><span class="cs-title">${t('payLbl')}</span></div>
+    <div class="pay-seg">
+      ${['cash','qris','debit'].map(p=>`
+        <button class="${S.pay===p?'on':''}" data-act="pay" data-val="${p}">
+          <i data-lucide="${p==='cash'?'banknote':p==='qris'?'qr-code':'credit-card'}"></i>${t(p)}
+        </button>`).join('')}
+    </div>
+    ${S.pay==='cash' ? `
+    <div class="cash-row">
+      <span class="mono" style="font-size:12.5px;color:var(--ink2)">${t('cashIn')}</span>
+      <input class="input" type="number" min="0" data-input="cash" value="${S.cash??''}" placeholder="0">
+    </div>
+    <div class="cash-out" id="cashOut"></div>` : ''}
+  </div>`;
+  icons(); updateCashOut();
+}
+function updateCashOut(){
+  const el = $('#cashOut'); if(!el) return;
+  const total = cartTotal();
+  if (S.cash==null || S.cash===''){ el.textContent=''; el.className='cash-out'; return; }
+  const c = Number(S.cash);
+  if (c < total){ el.textContent = t('insufficient'); el.className='cash-out badc'; }
+  else { el.textContent = `${t('change')}: ${fmt(c-total)}`; el.className='cash-out okc'; }
+}
+function renderCartFoot(){
+  const sub = cartSub(), disc = cartDisc(), total = sub-disc;
+  const bad = S.pay==='cash' && (S.cash==null || Number(S.cash) < total);
+  $('#cartFoot').innerHTML = `
+    <div class="sum-row"><span>${t('subtotal')}</span><span class="mono">${fmt(sub)}</span></div>
+    ${disc>0 ? `<div class="sum-row"><span>${t('discount')}</span><span class="mono">−${fmt(disc)}</span></div>` : ''}
+    <div class="sum-row total"><span>${t('total')}</span><span class="mono">${fmt(total)}</span></div>
+    <button class="btn big" data-act="checkout" ${(!cart.length || bad)?'disabled':''}>
+      <i data-lucide="check-check"></i>${t('checkout')}
+    </button>`;
+  icons(); updateCashOut();
+}
+
+function buildTrx(){
+  const sub = cartSub(), disc = cartDisc(), total = sub-disc;
+  return {
+    no: S.trxNo || genTrx(), ts: new Date(), cashier: S.user.name, pay: S.pay,
+    items: cart.map(c=>({...c})), sub, disc,
+    discLabel: (S.disc.type==='code' && S.disc.codeOk!=null) ? S.disc.code : null,
+    total, cash: S.pay==='cash' ? Number(S.cash) : null,
+    change: S.pay==='cash' ? Number(S.cash)-total : null,
+  };
+}
+function finalize(x){
+  TX.unshift(x);
+  x.items.forEach(it => { const m = DB.menu.find(m=>m.id===it.mid); if(m){ m.sold+=it.qty; m.soldToday+=it.qty; } });
+  cart = []; S.trxNo = null;
+  S.disc = {type:'code', code:'', codeOk:null, codeBad:false, nom:0}; S.cash = null;
+  updateCartBadge(false);
+}
+function receiptHTML(x){
+  const d = x.ts;
+  const date = d.toLocaleDateString(locale(),{day:'2-digit',month:'short',year:'numeric'});
+  const time = pad2(d.getHours())+':'+pad2(d.getMinutes());
+  const cap = v => v==='less' ? 'Less' : 'Normal';
+  return `
+  <div class="rc">
+    <div class="rc-head">${t('rcShop')}</div>
+    <div class="rc-sub">${t('rcAddr')}</div>
+    <div class="rc-dash"></div>
+    <div class="rc-row"><span>${x.no}</span><span>${date} ${time}</span></div>
+    <div class="rc-row"><span>${t('rcCashier')}</span><span>${esc(x.cashier)}</span></div>
+    <div class="rc-dash"></div>
+    ${x.items.map(it=>{
+      const bits = [];
+      if (it.temp) bits.push(it.temp==='cold'?'Cold':'Hot');
+      if (it.temp==='cold' && (it.opts?.lessIce||it.opts?.normalIce)) bits.push(cap(it.ice)+' Ice');
+      if (it.opts?.lessSugar||it.opts?.normalSugar) bits.push(cap(it.sugar)+' Sugar');
+      return `
+      <div class="rc-row"><span>${it.qty}× ${esc(it.name)}</span><span>${(it.price*it.qty).toLocaleString('id-ID')}</span></div>
+      ${bits.length ? `<div class="rc-opt">${bits.join(' · ')}</div>` : ''}`;
+    }).join('')}
+    <div class="rc-dash"></div>
+    <div class="rc-row"><span>${t('rcSub')}</span><span>${x.sub.toLocaleString('id-ID')}</span></div>
+    ${x.disc>0 ? `<div class="rc-row"><span>${t('rcDisc')}${x.discLabel?' ('+esc(x.discLabel)+')':''}</span><span>−${x.disc.toLocaleString('id-ID')}</span></div>` : ''}
+    <div class="rc-row rc-total"><span>${t('rcTotal')}</span><span>Rp${x.total.toLocaleString('id-ID')}</span></div>
+    <div class="rc-row"><span>${t('rcPay')}</span><span>${x.pay.toUpperCase()}${x.cash!=null?' · '+x.cash.toLocaleString('id-ID'):''}</span></div>
+    ${x.change!=null && x.change>=0 ? `<div class="rc-row"><span>${t('rcChange')}</span><span>${x.change.toLocaleString('id-ID')}</span></div>` : ''}
+    <div class="rc-dash"></div>
+    <div class="rc-thanks">${t('rcThanks')}</div>
+    <div class="rc-tag">Good Coffee Good Mood</div>
+  </div>`;
+}
+function openConfirm(){
+  const x = buildTrx();
+  openModal(`
+    <div class="modal-head">
+      <h3 class="modal-title">${t('confirmTitle')}</h3>
+      <button class="ibtn" data-act="modal-close"><i data-lucide="x"></i></button>
+    </div>
+    <div class="modal-body">${receiptHTML(x)}</div>
+    <div class="modal-foot">
+      <button class="btn-ghost" data-act="confirm-back">${t('back')}</button>
+      <button class="btn-ghost" data-act="confirm-finish">${t('noPrint')}</button>
+      <button class="btn" data-act="confirm-print"><i data-lucide="printer"></i>${t('printReceipt')}</button>
+    </div>`);
+}
+function printTrx(x){
+  $('#printArea').innerHTML = receiptHTML(x);
+  window.print();
+}
+
+/* ================================================================
+   HISTORY (TABEL)
+   ================================================================ */
+function histRows(){
+  const q = S.hq.trim().toLowerCase();
+  const list = [...TX].sort((a,b)=>b.ts-a.ts).filter(x=>!q || x.no.toLowerCase().includes(q));
+  if (!list.length) return `<tr><td colspan="7"><div class="empty"><i data-lucide="search-x"></i><p>${t('noResult')}</p></div></td></tr>`;
+  const payIc = p => p==='cash'?'banknote':p==='qris'?'qr-code':'credit-card';
+  return list.map(x=>{
+    const first = x.items[0]?.name || '';
+    const extra = x.items.length>1 ? `<span>${t('more').replace('n', x.items.length-1)}</span>` : '';
+    return `
+    <tr data-act="hist-view" data-no="${x.no}">
+      <td class="h-no mono">${x.no}</td>
+      <td class="h-when"><b>${x.ts.toLocaleDateString(locale(),{day:'numeric',month:'short',year:'numeric'})}</b><span>${pad2(x.ts.getHours())}:${pad2(x.ts.getMinutes())}</span></td>
+      <td>${esc(x.cashier)}</td>
+      <td class="h-item"><b>${esc(first)}</b>${extra}</td>
+      <td><span class="pay-pill p-${x.pay}"><i data-lucide="${payIc(x.pay)}"></i>${t(x.pay)}</span></td>
+      <td class="h-total mono">${fmt(x.total)}</td>
+      <td class="t-act">
+        <button class="ibtn" data-act="reprint" data-no="${x.no}" title="${t('reprint')}"><i data-lucide="printer"></i></button>
+      </td>
+    </tr>`;
+  }).join('');
+}
+function renderHistory(){
+  const todayTx = TX.filter(x=>sameDay(x.ts,new Date()));
+  const sales = todayTx.reduce((s,x)=>s+x.total,0);
+  const itemsN = todayTx.reduce((s,x)=>s+x.items.reduce((a,i)=>a+i.qty,0),0);
+  const avg = todayTx.length ? sales/todayTx.length : 0;
+  $('#page-history').innerHTML = `
+    <div class="page-head">
+      <div><h1 class="ph-title">${t('histTitle')}</h1><p class="ph-sub">${t('histSub')}</p></div>
+    </div>
+    <div class="stat-strip">
+      <div class="stat"><div class="stat-num">${fmt(sales)}</div><div class="stat-lbl">${t('statSales')}</div></div>
+      <div class="stat"><div class="stat-num">${todayTx.length}</div><div class="stat-lbl">${t('statTrx')}</div></div>
+      <div class="stat"><div class="stat-num">${itemsN}</div><div class="stat-lbl">${t('statItems')}</div></div>
+      <div class="stat"><div class="stat-num">${fmt(avg)}</div><div class="stat-lbl">Avg / ${t('statTrx')}</div></div>
+    </div>
+    <div class="search" style="max-width:380px;margin:22px 0 0">
+      <i data-lucide="search"></i><input data-input="hist-q" value="${esc(S.hq)}" placeholder="${t('searchTrx')}">
+    </div>
+    <div class="tbl"><table>
+      <thead><tr>
+        <th>${t('colNo')}</th><th>${t('colWhen')}</th><th>${t('colCashier')}</th>
+        <th>${t('colItem')}</th><th>${t('colPay')}</th><th>${t('colTotal')}</th><th></th>
+      </tr></thead>
+      <tbody id="histBody">${histRows()}</tbody>
+    </table></div>`;
+  icons();
+}
+
+/* ================================================================
+   SETTINGS
+   ================================================================ */
+function renderSettings(){
+  $('#page-settings').innerHTML = `
+    <div class="page-head">
+      <div><h1 class="ph-title">${t('setTitle')}</h1><p class="ph-sub">${t('setSub')}</p></div>
+    </div>
+    <div class="set-card"><div class="set-row">
+      <div><div class="set-title">${t('appearance')}</div><p class="set-desc">${t('themeDesc')}</p></div>
+      <div class="seg">
+        <button class="${S.theme==='light'?'on':''}" data-act="theme" data-val="light"><i data-lucide="sun"></i>${t('light')}</button>
+        <button class="${S.theme==='dark'?'on':''}" data-act="theme" data-val="dark"><i data-lucide="moon"></i>${t('dark')}</button>
+      </div>
+    </div></div>
+    <div class="set-card"><div class="set-row">
+      <div><div class="set-title">${t('language')}</div><p class="set-desc">${t('langDesc')}</p></div>
+      <div class="seg">
+        <button class="${S.lang==='id'?'on':''}" data-act="lang" data-val="id"><i data-lucide="globe"></i>Indonesia</button>
+        <button class="${S.lang==='en'?'on':''}" data-act="lang" data-val="en"><i data-lucide="globe"></i>English</button>
+      </div>
+    </div></div>
+    <div class="set-card"><div class="set-row">
+      <div><div class="set-title">${t('bugTitle')}</div><p class="set-desc">${t('bugDesc')}</p></div>
+      <button class="btn-ghost" data-act="bug-open"><i data-lucide="bug"></i>${t('bugOpenBtn')}</button>
+    </div></div>
+    <div class="set-card">
+      <div class="set-title">${t('account')}</div>
+      <p class="set-desc">${t('accDesc')}</p>
+      <div class="acc-grid">
+        <div class="acc-side">
+          <div class="acc-name">${esc(S.user.name)}</div>
+          <div class="acc-meta"><b>${S.user.uid}</b> · ${roleT(S.user.role)}<br>${t('phoneLbl')}: ${esc(S.user.phone)}</div>
+        </div>
+        <div>
+          <label class="fl"><span>${t('curPass')}</span><input class="input" type="password" id="accOld" autocomplete="current-password"></label>
+          <label class="fl"><span>${t('newPass')}</span><input class="input" type="password" id="accNew" autocomplete="new-password"></label>
+          <label class="fl"><span>${t('confPass')}</span><input class="input" type="password" id="accNew2" autocomplete="new-password"></label>
+          <button class="btn" data-act="save-pass" style="margin-bottom:24px"><i data-lucide="key-round"></i>${t('savePassBtn')}</button>
+          <label class="fl"><span>${t('phoneLbl')}</span><input class="input" id="accPhone" value="${esc(S.user.phone)}" placeholder="08xx-xxxx-xxxx"></label>
+          <button class="btn-ghost" data-act="save-phone"><i data-lucide="save"></i>${t('savePhoneBtn')}</button>
+        </div>
+      </div>
+    </div>`;
+  icons();
+}
+
+/* ================================================================
+   SUPERADMIN — LIST ORDER (manajemen menu, dengan sistem jenis)
+   ================================================================ */
+function renderListOrder(){
+  if (S.itemPage){ renderItemForm(); return; }
+  $('#page-listorder').innerHTML = `
+    <div class="page-head">
+      <div><h1 class="ph-title">${t('navListOrder')}</h1><p class="ph-sub">${t('menuHint')}</p></div>
+    </div>
+    <div class="o-row1">
+      <div class="search"><i data-lucide="search"></i><input data-input="admin-q" value="${esc(S.aq)}" placeholder="${t('searchMenu')}"></div>
+      <button class="btn" data-act="item-new"><i data-lucide="plus"></i>Items</button>
+    </div>
+    <div class="o-row2">
+      ${chipHTML('achip','all',t('allItems'),S.acat)}
+      ${ddHTML('acatDD','dd-pick',S.acat,'admin')}
+      ${chipHTML('achip','Coffee','Coffee',S.acat)}
+      ${chipHTML('achip','Non-Coffee','Non-Coffee',S.acat)}
+      ${chipHTML('achip','Food','Food',S.acat)}
+    </div>
+    <div id="aGrid">${menuGridHTML('item-edit', S.acat, S.aq)}</div>`;
+  icons();
+}
+
+function renderItemForm(){
+  const {mode, id, draft:d} = S.itemPage;
+  const jenis = d.cat==='__other__' ? (d.newJenis||'makanan') : catJenis(d.cat);
+  const isMin = jenis==='minuman';
+  const iceDis = isMin && d.temp!=='cold';
+  const chk = (key,label,dis=false) => `
+    <label class="chk ${dis?'dis':''}">
+      <input type="checkbox" data-chg="item-opt" data-key="${key}" ${d.opts[key]?'checked':''} ${dis?'disabled':''}>
+      <span>${label}</span>
+    </label>`;
+  const sugarChks = chk('lessSugar','Less Sugar') + chk('normalSugar','Normal Sugar');
+  const iceChks   = chk('lessIce','Less Ice', iceDis) + chk('normalIce','Normal Ice', iceDis);
+
+  $('#page-listorder').innerHTML = `
+    <button class="link-back" data-act="item-cancel"><i data-lucide="arrow-left"></i>${t('backList')}</button>
+    <div class="page-head">
+      <div><h1 class="ph-title">${mode==='edit' ? t('itemEditTitle') : t('itemNewTitle')}</h1>
+      ${mode==='edit' ? `<p class="ph-sub mono">${id}</p>` : ''}</div>
+    </div>
+    <div class="if-grid">
+      <div>
+        <div class="if-img"><img src="${d.img}" alt=""></div>
+        <button class="btn-ghost w100" data-act="img-pick"><i data-lucide="image-plus"></i>${t('changeImg')}</button>
+        <input type="file" accept="image/*" hidden id="imgFile" data-chg="item-img">
+      </div>
+      <div>
+        <label class="fl"><span>${t('itemName')}</span><input class="input" data-input="item-name" value="${esc(d.name)}" placeholder="${t('itemNamePh')}"></label>
+        <label class="fl"><span>${t('itemCat')}</span>
+          <select class="input" data-chg="item-cat">
+            ${DB.cats.map(c=>`<option value="${c.name}" ${d.cat===c.name?'selected':''}>${catLbl(c.name)}</option>`).join('')}
+            <option value="__other__" ${d.cat==='__other__'?'selected':''}>${t('otherCat')}</option>
+          </select>
+        </label>
+        <p class="hint" style="margin-top:-8px"><i data-lucide="info"></i>${isMin ? t('jenisDrinkHint') : t('jenisFoodHint')}</p>
+        ${d.cat==='__other__' ? `
+          <label class="fl" style="margin-top:16px"><span>${t('newCat')}</span><input class="input" data-input="item-newcat" value="${esc(d.newCat||'')}" placeholder="${t('newCatPh')}"></label>
+          <label class="fl"><span>${t('jenisLbl')}</span>
+            <select class="input" data-chg="item-newjenis">
+              <option value="makanan" ${d.newJenis==='makanan'?'selected':''}>${t('jenisMakanan')}</option>
+              <option value="minuman" ${d.newJenis==='minuman'?'selected':''}>${t('jenisMinuman')}</option>
+            </select>
+          </label>` : ''}
+        ${isMin ? `
+        <div class="fgroup"><span class="fl-lbl">${t('serve')}</span>
+          <div class="seg">
+            <button class="${d.temp==='cold'?'on':''}" data-act="item-temp" data-val="cold"><i data-lucide="snowflake"></i>${t('cold')}</button>
+            <button class="${d.temp==='hot'?'on':''}" data-act="item-temp" data-val="hot"><i data-lucide="flame"></i>${t('hot')}</button>
+          </div>
+        </div>` : ''}
+        <div class="fgroup"><span class="fl-lbl">${t('optsTitle')} <em>— ${t('optsDesc')}</em></span>
+          <div class="chk-grid">${isMin ? iceChks+sugarChks : sugarChks}</div>
+          ${iceDis ? `<p class="hint"><i data-lucide="info"></i>${t('iceOnlyCold')}</p>` : ''}
+        </div>
+        <label class="fl"><span>${t('price')}</span>
+          <div class="money"><span class="prefix">Rp</span><input class="input" type="number" min="0" data-input="item-price" value="${d.price||''}" placeholder="0"></div>
+        </label>
+        <div class="if-actions">
+          <button class="btn-ghost" data-act="item-cancel">${mode==='edit' ? t('cancelEdit') : t('cancelAdd')}</button>
+          ${mode==='edit' ? `<button class="btn btn-danger" data-act="item-del"><i data-lucide="trash-2"></i>${t('deleteItem')}</button>` : ''}
+          <button class="btn" data-act="item-save"><i data-lucide="save"></i>${mode==='edit' ? t('saveEdit') : t('addBtn')}</button>
+        </div>
+      </div>
+    </div>`;
+  icons();
+}
+
+function itemSave(){
+  const d = S.itemPage.draft;
+  const name = (d.name||'').trim(), price = parseInt(d.price)||0;
+  if (!name || !price){ toast(t('itemInvalid'),'err'); return; }
+  let cat = d.cat;
+  if (cat==='__other__'){
+    const nc = (d.newCat||'').trim();
+    if (!nc){ toast(t('catNeeded'),'err'); return; }
+    const j = d.newJenis||'makanan';
+    if (!DB.cats.find(c=>c.name===nc)) DB.cats.push({name:nc, jenis:j});
+    cat = nc;
+  }
+  const isMin = catJenis(cat)==='minuman';
+  const opts = {
+    lessIce:      isMin ? (d.opts.lessIce?1:0) : 0,
+    normalIce:    isMin ? (d.opts.normalIce?1:0) : 0,
+    lessSugar:    d.opts.lessSugar?1:0,
+    normalSugar:  d.opts.normalSugar?1:0,
+  };
+  const temp = isMin ? (d.temp||'cold') : null;
+  if (S.itemPage.mode==='edit'){
+    const m = DB.menu.find(x=>x.id===S.itemPage.id);
+    Object.assign(m, {name, cat, price, temp, opts, img: d.img||m.img||undefined});
+    toast(t('itemSaved'),'ok');
+  } else {
+    const nid = 'M' + String(DB.menu.reduce((mx,m)=>Math.max(mx, parseInt(m.id.slice(1))||0),0)+1).padStart(2,'0');
+    DB.menu.push({id:nid, name, cat, price, temp, sold:0, soldToday:0, img:d.img,
+      seed:'menu-'+Math.random().toString(36).slice(2,8), opts});
+    toast(t('itemAdded'),'ok');
+  }
+  S.itemPage = null; renderListOrder();
+}
+function itemDelete(){
+  const {id, draft:d} = S.itemPage;
+  openModal(`
+    <div class="modal-head"><h3 class="modal-title">${t('delItemT')}</h3>
+      <button class="ibtn" data-act="modal-close"><i data-lucide="x"></i></button></div>
+    <div class="del-body">
+      <i data-lucide="trash-2" class="big"></i>
+      <p>${t('delItemConfirm')}</p>
+      <p class="mono del-name">${esc(d.name||id)}</p>
+    </div>
+    <div class="modal-foot">
+      <button class="btn-ghost" data-act="modal-close">${t('cancel')}</button>
+      <button class="btn btn-danger" data-act="item-del-yes" data-id="${id}"><i data-lucide="trash-2"></i>${t('deleteItem')}</button>
+    </div>`, 'sm');
+}
+
+/* ================================================================
+   SUPERADMIN — LIST USER
+   ================================================================ */
+const ROLES = ['Kasir','Admin','Superadmin'];
+function userRows(){
+  const q = S.uq.trim().toLowerCase();
+  const list = DB.users.filter(u => !q || u.uid.toLowerCase().includes(q) || u.name.toLowerCase().includes(q) || u.role.toLowerCase().includes(q));
+  if (!list.length) return `<tr><td colspan="6"><div class="empty"><i data-lucide="search-x"></i><p>${t('noResult')}</p></div></td></tr>`;
+  return list.map(u=>`
+    <tr>
+      <td class="mono uid">${u.uid}</td>
+      <td>${esc(u.name)}</td>
+      <td><span class="role-pill rp-${u.role}">${roleT(u.role)}</span></td>
+      <td class="pass">
+        <span class="mono">${S.reveal.has(u.uid) ? esc(u.pass) : '••••••••'}</span>
+        <button class="ibtn" data-act="reveal" data-uid="${u.uid}"><i data-lucide="${S.reveal.has(u.uid)?'eye-off':'eye'}"></i></button>
+      </td>
+      <td class="mono">${esc(u.phone)}</td>
+      <td class="t-act">
+        <button class="ibtn" data-act="user-edit" data-uid="${u.uid}" title="${t('editUser')}"><i data-lucide="pencil"></i></button>
+        <button class="ibtn danger" data-act="user-del" data-uid="${u.uid}" title="${t('delUserT')}"><i data-lucide="trash-2"></i></button>
+      </td>
+    </tr>`).join('');
+}
+function renderUsers(){
+  $('#page-listuser').innerHTML = `
+    <div class="page-head">
+      <div><h1 class="ph-title">${t('userTitle')}</h1><p class="ph-sub">${t('userSub')}</p></div>
+    </div>
+    <div class="o-row1">
+      <div class="search"><i data-lucide="search"></i><input data-input="user-q" value="${esc(S.uq)}" placeholder="${t('searchUser')}"></div>
+      <button class="btn" data-act="user-new"><i data-lucide="plus"></i>User</button>
+    </div>
+    <div class="tbl"><table>
+      <thead><tr>
+        <th>${t('colId')}</th><th>${t('colName')}</th><th>${t('colRole')}</th>
+        <th>${t('colPass')}</th><th>${t('colPhone')}</th><th style="text-align:right">${t('colAct')}</th>
+      </tr></thead>
+      <tbody id="userBody">${userRows()}</tbody>
+    </table></div>`;
+  icons();
+}
+
+/* ================================================================
+   DISPATCH AKSI
+   ================================================================ */
+function closeDDs(){ $$('.dd.open').forEach(d=>d.classList.remove('open')); }
+function syncTempToJenis(d){
+  const jenis = d.cat==='__other__' ? (d.newJenis||'makanan') : catJenis(d.cat);
+  d.temp = jenis==='minuman' ? (d.temp||'cold') : null;
+}
+
+const ACTIONS = {
+  'login-fill': el => { $('#loginUid').value = el.dataset.uid; $('#loginPass').value = el.dataset.pass; $('#loginErr').classList.remove('show'); },
+  'toggle-pass': el => {
+    const inp = document.getElementById(el.dataset.target);
+    const show = inp.type === 'password';
+    inp.type = show ? 'text' : 'password';
+    el.innerHTML = `<i data-lucide="${show?'eye-off':'eye'}"></i>`; icons();
+  },
+  'nav':    el => go(el.dataset.page),
+  'logout': ()  => doLogout(),
+  'chip':  el => { S.cat = el.dataset.val; renderOrder(); },
+  'achip': el => { S.acat = el.dataset.val; renderListOrder(); },
+  'dd-toggle': (el,e) => { e.stopPropagation(); el.closest('.dd').classList.toggle('open'); },
+  'dd-pick': el => {
+    const v = el.dataset.val;
+    if (el.dataset.scope==='admin') S.acat = v; else S.cat = v;
+    closeDDs();
+    S.page==='listorder' ? renderListOrder() : renderOrder();
+  },
+  'disc-type': el => {
+    S.disc.type = el.dataset.val;
+    if (S.disc.type==='nom') { S.disc.codeOk=null; S.disc.codeBad=false; }
+    else { S.disc.nom = 0; }
+    closeDDs(); renderDisc(); renderCartFoot();
+  },
+  'apply-code': () => {
+    S.disc.code = (S.disc.code||'').toUpperCase().trim();
+    const v = DB.codes[S.disc.code];
+    S.disc.codeOk = v!=null ? v : null;
+    S.disc.codeBad = v==null && !!S.disc.code;
+    renderDisc(); renderCartFoot();
+    if (v!=null) toast(`${S.disc.code} · −${fmt(v)}`,'ok');
+  },
+  'add-cart': el => addToCart(el.dataset.id),
+  'cart-open': () => { document.body.classList.add('cart-open'); renderCartAll(); },
+  'cart-close': () => document.body.classList.remove('cart-open'),
+  'qty-inc': el => { cart[+el.dataset.i].qty++; renderCartItems(); renderCartFoot(); updateCartBadge(false); },
+  'qty-dec': el => {
+    const i = +el.dataset.i;
+    if (--cart[i].qty <= 0) cart.splice(i,1);
+    if (!cart.length) S.trxNo = null;
+    renderCartItems(); renderCartFoot(); updateCartBadge(false);
+    $('#cdTrx').innerHTML = `${t('trxNoLbl')}: <b>${S.trxNo || t('trxNoPh')}</b>`;
+  },
+  'opt': el => {
+    const it = cart[+el.dataset.i];
+    it[el.dataset.kind] = el.dataset.val;
+    renderCartItems(); renderCartFoot();
+  },
+  'pay': el => { S.pay = el.dataset.val; renderPay(); renderCartFoot(); },
+  'checkout': () => {
+    if (!cart.length) return;
+    const total = cartTotal();
+    if (S.pay==='cash' && (S.cash==null || Number(S.cash) < total)){ toast(t('insufficient'),'err'); return; }
+    openConfirm();
+  },
+  'confirm-back':   () => closeModal(),
+  'confirm-finish': () => {
+    const x = buildTrx(); finalize(x);
+    closeModal(); document.body.classList.remove('cart-open');
+    renderActive(); toast(`${t('trxDone')} ${x.no}`,'ok');
+  },
+  'confirm-print': () => {
+    const x = buildTrx(); finalize(x);
+    closeModal(); document.body.classList.remove('cart-open');
+    printTrx(x); renderActive();
+    toast(`${t('trxDone')} ${x.no}`,'ok');
+  },
+  'hist-view': el => {
+    const x = TX.find(y=>y.no===el.dataset.no); if(!x) return;
+    openModal(`
+      <div class="modal-head"><h3 class="modal-title" style="font-family:'JetBrains Mono';font-size:15px">${x.no}</h3>
+        <button class="ibtn" data-act="modal-close"><i data-lucide="x"></i></button></div>
+      <div class="modal-body">${receiptHTML(x)}</div>
+      <div class="modal-foot">
+        <button class="btn-ghost" data-act="modal-close">${t('cancel')}</button>
+        <button class="btn" data-act="reprint" data-no="${x.no}"><i data-lucide="printer"></i>${t('reprint')}</button>
+      </div>`);
+  },
+  'reprint': el => { const x = TX.find(y=>y.no===el.dataset.no); if(x) printTrx(x); },
+  'theme': el => {
+    S.theme = el.dataset.val; localStorage.setItem('seduh-theme', S.theme);
+    document.documentElement.dataset.theme = S.theme; renderSettings();
+  },
+  'lang': el => {
+    S.lang = el.dataset.val; localStorage.setItem('seduh-lang', S.lang);
+    applyI18n(); renderSidebar(); renderActive();
+    if (document.body.classList.contains('cart-open')) renderCartAll();
+  },
+  'bug-open': () => openModal(`
+    <div class="modal-head"><h3 class="modal-title">${t('bugTitle')}</h3>
+      <button class="ibtn" data-act="modal-close"><i data-lucide="x"></i></button></div>
+    <div class="mform">
+      <label class="fl"><span>${t('bugSum')}</span><input class="input" id="bugSum" placeholder="${t('bugSumPh')}"></label>
+      <label class="fl"><span>${t('bugSteps')}</span><textarea class="input" id="bugSteps" rows="4" placeholder="${t('bugStepsPh')}" style="resize:vertical"></textarea></label>
+    </div>
+    <div class="modal-foot">
+      <button class="btn-ghost" data-act="modal-close">${t('cancel')}</button>
+      <button class="btn" data-act="bug-send"><i data-lucide="send"></i>${t('bugSend')}</button>
+    </div>`),
+  'bug-send': () => {
+    if (!$('#bugSum').value.trim()){ toast(t('fillAll'),'err'); return; }
+    closeModal(); toast(t('bugSent'),'ok');
+  },
+  'save-pass': () => {
+    const o = $('#accOld').value, n = $('#accNew').value, c = $('#accNew2').value;
+    if (o !== S.user.pass){ toast(t('passWrong'),'err'); return; }
+    if (n.length < 6){ toast(t('passShort'),'err'); return; }
+    if (n !== c){ toast(t('passMismatch'),'err'); return; }
+    S.user.pass = n; toast(t('savedToast'),'ok'); renderSettings();
+  },
+  'save-phone': () => {
+    const v = $('#accPhone').value.trim();
+    if (!/^[0-9+\-\s]{9,16}$/.test(v)){ toast(t('phoneBad'),'err'); return; }
+    S.user.phone = v; toast(t('savedToast'),'ok'); renderSettings();
+  },
+  /* ---- admin: item ---- */
+  'item-edit': el => {
+    const m = DB.menu.find(x=>x.id===el.dataset.id); if(!m) return;
+    S.itemPage = { mode:'edit', id:m.id, draft:{
+      name:m.name, cat:m.cat, newCat:'', newJenis:'makanan', price:m.price,
+      temp: catJenis(m.cat)==='minuman' ? (m.temp||'cold') : null,
+      opts:{...(m.opts||{lessIce:0,normalIce:0,lessSugar:0,normalSugar:0})},
+      img: img(m),
+    }};
+    renderListOrder();
+  },
+  'item-new': () => {
+    S.itemPage = { mode:'new', id:null, draft:{
+      name:'', cat:DB.cats[0].name, newCat:'', newJenis:'makanan', price:'',
+      temp: DB.cats[0].jenis==='minuman' ? 'cold' : null,
+      opts:{lessIce:0,normalIce:0,lessSugar:0,normalSugar:0},
+      img:`https://picsum.photos/seed/menu-${Math.random().toString(36).slice(2,8)}/400/300.jpg`,
+    }};
+    renderListOrder();
+  },
+  'item-cancel': () => { S.itemPage = null; renderListOrder(); },
+  'img-pick':  () => $('#imgFile') && $('#imgFile').click(),
+  'item-temp': el => { S.itemPage.draft.temp = el.dataset.val; renderItemForm(); },
+  'item-save': () => itemSave(),
+  'item-del':  () => itemDelete(),
+  'item-del-yes': el => {
+    DB.menu = DB.menu.filter(x=>x.id!==el.dataset.id);
+    cart = cart.filter(c=>c.mid!==el.dataset.id);
+    if (!cart.length) S.trxNo = null;
+    updateCartBadge(false);
+    S.itemPage = null; closeModal(); renderListOrder();
+    toast(t('itemDeleted'),'ok');
+  },
+  /* ---- admin: user ---- */
+  'reveal': el => {
+    const uid = el.dataset.uid;
+    S.reveal.has(uid) ? S.reveal.delete(uid) : S.reveal.add(uid);
+    $('#userBody').innerHTML = userRows(); icons();
+  },
+  'user-edit': el => {
+    const u = DB.users.find(x=>x.uid===el.dataset.uid); if(!u) return;
+    openModal(`
+      <div class="modal-head"><h3 class="modal-title">${t('editUser')}</h3>
+        <button class="ibtn" data-act="modal-close"><i data-lucide="x"></i></button></div>
+      <div class="mform">
+        <label class="fl"><span>${t('colId')}</span>
+          <div class="locked" title="${t('uidLocked')}"><i data-lucide="lock"></i><input class="input" value="${u.uid}" readonly></div>
+        </label>
+        <label class="fl"><span>${t('colName')}</span><input class="input" id="mu-name" value="${esc(u.name)}"></label>
+        <label class="fl"><span>${t('colRole')}</span>
+          <select class="input" id="mu-role">${ROLES.map(r=>`<option value="${r}" ${u.role===r?'selected':''}>${roleT(r)}</option>`).join('')}</select>
+        </label>
+        <label class="fl"><span>${t('colPass')}</span><input class="input" id="mu-pass" value="${esc(u.pass)}"></label>
+        <label class="fl"><span>${t('phoneLbl')}</span><input class="input" id="mu-phone" value="${esc(u.phone)}"></label>
+      </div>
+      <div class="modal-foot">
+        <button class="btn-ghost" data-act="modal-close">${t('cancel')}</button>
+        <button class="btn" data-act="user-save" data-uid="${u.uid}"><i data-lucide="save"></i>${t('save')}</button>
+      </div>`);
+  },
+  'user-save': el => {
+    const u = DB.users.find(x=>x.uid===el.dataset.uid);
+    const name = $('#mu-name').value.trim(), pass = $('#mu-pass').value, phone = $('#mu-phone').value.trim();
+    if (!name || !pass){ toast(t('fillAll'),'err'); return; }
+    Object.assign(u, {name, role:$('#mu-role').value, pass, phone: phone||u.phone});
+    closeModal(); renderUsers(); toast(t('userSaved'),'ok');
+    if (u.uid===S.user.uid) renderSidebar();
+  },
+  'user-del': el => {
+    const u = DB.users.find(x=>x.uid===el.dataset.uid); if(!u) return;
+    openModal(`
+      <div class="modal-head"><h3 class="modal-title">${t('delUserT')}</h3>
+        <button class="ibtn" data-act="modal-close"><i data-lucide="x"></i></button></div>
+      <div class="del-body">
+        <i data-lucide="trash-2" class="big"></i>
+        <p>${t('delConfirm')}</p>
+        <p class="mono del-name">${u.uid} · ${esc(u.name)}</p>
+      </div>
+      <div class="modal-foot">
+        <button class="btn-ghost" data-act="modal-close">${t('cancel')}</button>
+        <button class="btn btn-danger" data-act="user-del-yes" data-uid="${u.uid}"><i data-lucide="trash-2"></i>${t('del')}</button>
+      </div>`, 'sm');
+  },
+  'user-del-yes': el => {
+    if (el.dataset.uid === S.user.uid){ toast(t('cannotSelf'),'err'); return; }
+    DB.users = DB.users.filter(x=>x.uid!==el.dataset.uid);
+    closeModal(); renderUsers(); toast(t('userDeleted'),'ok');
+  },
+  'user-new': () => openModal(`
+    <div class="modal-head"><h3 class="modal-title">${t('addUserT')}</h3>
+      <button class="ibtn" data-act="modal-close"><i data-lucide="x"></i></button></div>
+    <div class="mform">
+      <label class="fl"><span>${t('colName')}</span><input class="input" id="mn-name" placeholder="${t('colName')}"></label>
+      <label class="fl"><span>${t('colRole')}</span>
+        <select class="input" id="mn-role">${ROLES.map(r=>`<option value="${r}">${roleT(r)}</option>`).join('')}</select>
+      </label>
+      <label class="fl"><span>${t('colPass')}</span><input class="input" id="mn-pass" placeholder="••••••••"></label>
+      <label class="fl"><span>${t('phoneLbl')}</span><input class="input" id="mn-phone" placeholder="08xx-xxxx-xxxx"></label>
+    </div>
+    <div class="modal-foot">
+      <button class="btn-ghost" data-act="modal-close">${t('cancel')}</button>
+      <button class="btn" data-act="user-new-save"><i data-lucide="plus"></i>${t('save')}</button>
+    </div>`),
+  'user-new-save': () => {
+    const name = $('#mn-name').value.trim(), pass = $('#mn-pass').value, phone = $('#mn-phone').value.trim();
+    if (!name || !pass){ toast(t('fillAll'),'err'); return; }
+    const n = DB.users.reduce((mx,u)=>Math.max(mx, parseInt(u.uid.slice(4))||0),0)+1;
+    DB.users.push({uid:'USR-'+String(n).padStart(3,'0'), name, role:$('#mn-role').value, pass, phone:phone||'—'});
+    closeModal(); renderUsers(); toast(t('userAdded'),'ok');
+  },
+  'modal-close': () => closeModal(),
+};
+
+document.addEventListener('click', e => {
+  if (!e.target.closest('.dd')) closeDDs();
+  const el = e.target.closest('[data-act]'); if (!el) return;
+  e.preventDefault();
+  const fn = ACTIONS[el.dataset.act];
+  if (fn) fn(el, e);
+});
+
+/* input teks (pencarian & field form) */
+document.addEventListener('input', e => {
+  const el = e.target.closest('[data-input]'); if (!el) return;
+  const k = el.dataset.input;
+  if (k==='order-q'){ S.q = el.value; $('#menuGrid').innerHTML = menuGridHTML('add-cart', S.cat, S.q); icons(); }
+  else if (k==='admin-q'){ S.aq = el.value; $('#aGrid').innerHTML = menuGridHTML('item-edit', S.acat, S.aq); icons(); }
+  else if (k==='user-q'){ S.uq = el.value; $('#userBody').innerHTML = userRows(); icons(); }
+  else if (k==='hist-q'){ S.hq = el.value; $('#histBody').innerHTML = histRows(); icons(); }
+  else if (k==='disc-code'){ S.disc.code = el.value.toUpperCase(); S.disc.codeOk=null; S.disc.codeBad=false; }
+  else if (k==='disc-nom'){ S.disc.nom = parseInt(el.value)||0; renderCartFoot(); }
+  else if (k==='cash'){ S.cash = el.value==='' ? null : Number(el.value); renderCartFoot(); }
+  else if (k==='item-name'){ if(S.itemPage) S.itemPage.draft.name = el.value; }
+  else if (k==='item-price'){ if(S.itemPage) S.itemPage.draft.price = el.value; }
+  else if (k==='item-newcat'){ if(S.itemPage) S.itemPage.draft.newCat = el.value; }
+});
+
+/* select, checkbox, upload gambar */
+document.addEventListener('change', e => {
+  const el = e.target.closest('[data-chg]'); if (!el) return;
+  const k = el.dataset.chg;
+  if (k==='item-cat' && S.itemPage){
+    S.itemPage.draft.cat = el.value;
+    syncTempToJenis(S.itemPage.draft);
+    renderItemForm();
+  }
+  else if (k==='item-newjenis' && S.itemPage){
+    S.itemPage.draft.newJenis = el.value;
+    syncTempToJenis(S.itemPage.draft);
+    renderItemForm();
+  }
+  else if (k==='item-opt' && S.itemPage){ S.itemPage.draft.opts[el.dataset.key] = el.checked ? 1 : 0; }
+  else if (k==='item-img' && S.itemPage && el.files && el.files[0]){
+    const r = new FileReader();
+    r.onload = ev => { S.itemPage.draft.img = ev.target.result; renderItemForm(); };
+    r.readAsDataURL(el.files[0]);
+    el.value = '';
+  }
+});
+
+/* ---------- INIT ---------- */
+applyI18n();
+icons();
+</script>
+</body>
+</html>

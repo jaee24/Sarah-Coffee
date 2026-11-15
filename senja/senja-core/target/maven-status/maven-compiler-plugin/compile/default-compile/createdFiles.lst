@@ -1,0 +1,13 @@
+com\senja\core\Tables.class
+com\senja\core\Uuid.class
+com\senja\core\Seed.class
+com\senja\core\Const.class
+com\senja\core\SyncResult.class
+com\senja\core\SyncClient.class
+com\senja\core\SyncMeta.class
+com\senja\core\SyncEngine.class
+com\senja\core\SyncClient$1.class
+com\senja\core\Smoke.class
+com\senja\core\Tables$T.class
+com\senja\core\Db.class
+com\senja\core\Db$SqlBody.class
